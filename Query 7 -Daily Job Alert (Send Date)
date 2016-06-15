@@ -1,0 +1,45 @@
+--Q7 Daily Job Alert (Send Date)
+
+SELECT
+	Count(profile.jskr_id)
+FROM
+	test1.t_profile_partition profile
+WHERE
+	(
+		Profile.last_login_date > CURRENT_DATE - 60
+		OR Profile.Last_Application_Date > CURRENT_DATE - 14
+		OR Profile.reg_date > CURRENT_DATE - 14
+		OR Profile.Last_send_date > CURRENT_DATE - 60
+	)
+AND (
+	profile.daily_job_alert = TRUE --OR profile.daily_job_alert_weekly = TRUE
+	--OR profile.daily_job_alert_monthly = TRUE
+)
+AND profile.zip_code IN (
+	SELECT DISTINCT
+		"To_ZIPCODE"
+	FROM
+		test1."T_ZIP_Neighborhood" A
+	INNER JOIN test1."T_RGIS" b ON A ."From_ZIPCODE" = b."RGIS_ZIPCODE" --where a."Distance" <=50
+)
+AND profile. STATE IN (
+	'state_1',
+	'state_5',
+	'state_7',
+	'state_10',
+	'state_12',
+	'state_18',
+	'state_20',
+	'state_25',
+	'state_30',
+	'state_35',
+	'state_40',
+	'state_42'
+)
+AND profile.email_address !~* '(aol.com|gmail.com)'
+AND (
+	Profile.reg_date > CURRENT_DATE - 14
+	OR Profile.Last_open_date < CURRENT_DATE - 30
+	OR Profile.Last_Click_Date < CURRENT_DATE - 30
+);
+

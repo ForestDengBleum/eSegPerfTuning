@@ -1,0 +1,18 @@
+--Query 8 Welcome Day 6
+
+SELECT
+	Count(profile.jskr_id)
+FROM
+	test1.t_profile_partition profile
+WHERE
+	Profile.reg_date < CURRENT_DATE - 6
+AND (
+	profile.daily_job_alert = TRUE
+	OR profile.daily_job_alert_weekly = TRUE
+	OR (
+		Profile.empr_job_alert = TRUE
+		OR Profile.empr_job_alert_weekly = TRUE
+		OR Profile.empr_job_alert_monthly = TRUE
+	)
+);
+

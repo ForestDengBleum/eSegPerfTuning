@@ -1,0 +1,26 @@
+--Q10 Winback Day 1
+
+SELECT
+	Count(profile.jskr_id)
+FROM
+	test1.t_profile_partition profile
+WHERE
+	(
+		Profile.Last_Application_Date BETWEEN CURRENT_DATE - 90
+		AND CURRENT_DATE - 31
+		OR Profile.Last_open_date BETWEEN CURRENT_DATE - 90
+		AND CURRENT_DATE - 60
+		OR profile.Last_open_date IS NULL
+		OR Profile.Last_Click_Date BETWEEN CURRENT_DATE - 90
+		AND CURRENT_DATE - 60
+		OR Profile.Last_Click_Date IS NULL
+	)
+AND (
+	profile.daily_job_alert = TRUE
+	OR profile.daily_job_alert_weekly = TRUE
+	OR (
+		Profile.empr_job_alert = TRUE
+		OR Profile.empr_job_alert_weekly = TRUE
+		OR Profile.empr_job_alert_monthly = TRUE
+	)
+);

@@ -1,0 +1,18 @@
+--Q4 Birthday
+
+SELECT
+	Count(profile.jskr_id)
+FROM
+	test1.t_profile_partition profile
+WHERE
+	(
+		profile.daily_job_alert = TRUE --OR profile.daily_job_alert_weekly = TRUE
+		--OR profile.daily_job_alert_monthly = TRUE
+	)
+OR (
+	Profile.empr_job_alert = TRUE
+	OR Profile.empr_job_alert_weekly = TRUE
+	OR Profile.empr_job_alert_monthly = TRUE
+)
+AND to_Char(Profile.birth_date, 'DDMM') = to_char(CURRENT_DATE, 'DDMM');
+

@@ -1,0 +1,22 @@
+--Q5 Response Model
+
+SELECT
+	Count(profile.jskr_id)
+FROM
+	test1.t_profile_partition profile
+WHERE
+	(
+		profile.daily_job_alert = TRUE --OR profile.daily_job_alert_weekly = TRUE
+		--OR profile.daily_job_alert_monthly = TRUE
+	)
+AND Profile.Last_open_date > CAST (now() AS DATE) - 60
+AND profile.email_enga_score IN (
+	SELECT DISTINCT
+		A ."email_enga_score"
+	FROM
+		test1.t_profile_partition A
+	ORDER BY
+		A ."email_enga_score" DESC
+	LIMIT 20
+);
+

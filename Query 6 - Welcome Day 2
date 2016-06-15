@@ -1,0 +1,13 @@
+--Q6 Welcome Day 2
+
+SELECT
+	Count(profile.jskr_id)
+FROM
+	test1.t_profile_partition profile
+WHERE
+	(
+		profile.daily_job_alert = TRUE --OR profile.daily_job_alert_weekly = TRUE
+		--OR profile.daily_job_alert_monthly = TRUE
+	)
+AND Profile.reg_date = CURRENT_DATE - 1;
+

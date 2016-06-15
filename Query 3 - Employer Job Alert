@@ -1,0 +1,38 @@
+--Q3 Employer Job Alert (ZIPs)
+
+SELECT
+	Count(profile.jskr_id)
+FROM
+	test1.t_profile_partition profile
+WHERE
+	(
+		Profile.Last_Application_Date > CURRENT_DATE - 60
+		OR Profile.reg_date > CURRENT_DATE - 60
+		OR Profile.Last_Click_Date > CURRENT_DATE - 60
+		OR Profile.Last_open_date > CURRENT_DATE - 60
+	)
+AND (
+	Profile.empr_job_alert = TRUE
+	OR Profile.empr_job_alert_weekly = TRUE
+	OR Profile.empr_job_alert_monthly = TRUE
+)
+AND (
+	Profile.birth_date > CURRENT_DATE - 5840
+	OR Profile.birth_date IS NULL
+)
+AND profile.zip_code IN (
+	SELECT DISTINCT
+		"To_ZIPCODE"
+	FROM
+		test1."T_ZIP_Neighborhood" A
+	WHERE
+		A ."Distance" <= 15
+	AND A ."From_ZIPCODE" IN (
+		'78550',
+		'80521',
+		'83814',
+		'83835',
+		'99016'
+	)
+);
+
