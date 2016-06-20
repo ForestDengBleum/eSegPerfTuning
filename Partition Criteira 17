@@ -1,0 +1,561 @@
+drop table IF EXISTS test1.t_profile_partition_months_more CASCADE;
+
+CREATE TABLE test1.t_profile_partition_months_more (
+	jskr_id VARCHAR (50) NOT NULL,
+	email_address VARCHAR (100) NOT NULL,
+	first_name VARCHAR (50) NOT NULL,
+	last_name VARCHAR (50) NOT NULL,
+	"state" VARCHAR (50) NOT NULL,
+	city VARCHAR (50) NOT NULL,
+	zip_code VARCHAR (5) NOT NULL,
+	birth_date DATE NULL,
+	reg_date DATE NOT NULL,
+	last_login_date DATE NULL,
+	job_exp_level int4 NULL,
+	edu_level int4 NULL,
+	daily_job_alert BOOLEAN NULL,
+	daily_job_alert_weekly BOOLEAN NULL,
+	daily_job_alert_monthly BOOLEAN NULL,
+	empr_job_alert BOOLEAN NULL,
+	empr_job_alert_weekly BOOLEAN NULL,
+	empr_job_alert_monthly BOOLEAN NULL,
+	recu_alert BOOLEAN NULL,
+	recu_alert_weekly BOOLEAN NULL,
+	recu_alert_monthly BOOLEAN NULL,
+	parn_alert BOOLEAN NULL,
+	avail_mod_complete BOOLEAN NULL,
+	mon_mod_complete BOOLEAN NULL,
+	video_mod_complete BOOLEAN NULL,
+	work_hist_mod_complete BOOLEAN NULL,
+	edu_mod_complete BOOLEAN NULL,
+	refer_mod_complete BOOLEAN NULL,
+	visua_mod_complete BOOLEAN NULL,
+	drv_mod_complete BOOLEAN NULL,
+	mgr_mod_complete BOOLEAN NULL,
+	prof_percent_complete BOOLEAN NULL,
+	email_enga_score float8 NULL,
+	app_sub_count int4 NOT NULL,
+	sync_time TIMESTAMP (6) NOT NULL,
+	gender VARCHAR (50),
+	prof_update_date DATE,
+	Last_open_date DATE,
+	Last_Click_Date DATE,
+	Last_Application_Date DATE,
+	Last_send_date DATE,	
+	PRIMARY KEY (jskr_id)
+) WITH (OIDS = FALSE)
+;
+CREATE TABLE test1.t_profile_partition_more_truealert_1_1 (
+CHECK (
+	(daily_job_alert = true OR
+	daily_job_alert_weekly=TRUE OR
+	daily_job_alert_monthly=TRUE OR
+	empr_job_alert = TRUE OR
+	empr_job_alert_weekly = true OR
+	empr_job_alert_monthly= TRUE)
+	AND
+	(last_login_date >= CURRENT_DATE -90 AND 
+	reg_date>=CURRENT_DATE-90 AND
+	last_click_date>=CURRENT_DATE -90 AND
+	last_open_date>=CURRENT_DATE -90)
+ )
+) INHERITS (test1.t_profile_partition_months_more);
+
+CREATE TABLE test1.t_profile_partition_more_truealert_1_2 (
+CHECK (
+	(daily_job_alert = true OR
+	daily_job_alert_weekly=TRUE OR
+	daily_job_alert_monthly=TRUE OR
+	empr_job_alert = TRUE OR
+	empr_job_alert_weekly = true OR
+	empr_job_alert_monthly= TRUE)
+	AND
+	(last_login_date >= CURRENT_DATE -90 AND 
+	reg_date < CURRENT_DATE-90 AND
+	last_click_date>=CURRENT_DATE -90 AND
+	last_open_date>=CURRENT_DATE -90)
+ )
+) INHERITS (test1.t_profile_partition_months_more);
+
+CREATE TABLE test1.t_profile_partition_more_truealert_1_3 (
+CHECK (
+	(daily_job_alert = true OR
+	daily_job_alert_weekly=TRUE OR
+	daily_job_alert_monthly=TRUE OR
+	empr_job_alert = TRUE OR
+	empr_job_alert_weekly = true OR
+	empr_job_alert_monthly= TRUE)
+	AND
+	(last_login_date >= CURRENT_DATE -90 AND 
+	reg_date >= CURRENT_DATE-90 AND
+	last_click_date<CURRENT_DATE -90 AND
+	last_open_date>=CURRENT_DATE -90)
+ )
+) INHERITS (test1.t_profile_partition_months_more);
+
+CREATE TABLE test1.t_profile_partition_more_truealert_1_4 (
+CHECK (
+	(daily_job_alert = true OR
+	daily_job_alert_weekly=TRUE OR
+	daily_job_alert_monthly=TRUE OR
+	empr_job_alert = TRUE OR
+	empr_job_alert_weekly = true OR
+	empr_job_alert_monthly= TRUE)
+	AND
+	(last_login_date >= CURRENT_DATE -90 AND 
+	reg_date >= CURRENT_DATE-90 AND
+	last_click_date>=CURRENT_DATE -90 AND
+	last_open_date<CURRENT_DATE -90)
+ )
+) INHERITS (test1.t_profile_partition_months_more);
+
+CREATE TABLE test1.t_profile_partition_more_truealert_1_5 (
+CHECK (
+	(daily_job_alert = true OR
+	daily_job_alert_weekly=TRUE OR
+	daily_job_alert_monthly=TRUE OR
+	empr_job_alert = TRUE OR
+	empr_job_alert_weekly = true OR
+	empr_job_alert_monthly= TRUE)
+	AND
+	(last_login_date >= CURRENT_DATE -90 AND 
+	reg_date < CURRENT_DATE-90 AND
+	last_click_date <CURRENT_DATE -90 AND
+	last_open_date>=CURRENT_DATE -90)
+ )
+) INHERITS (test1.t_profile_partition_months_more);
+
+CREATE TABLE test1.t_profile_partition_more_truealert_1_6 (
+CHECK (
+	(daily_job_alert = true OR
+	daily_job_alert_weekly=TRUE OR
+	daily_job_alert_monthly=TRUE OR
+	empr_job_alert = TRUE OR
+	empr_job_alert_weekly = true OR
+	empr_job_alert_monthly= TRUE)
+	AND
+	(last_login_date >= CURRENT_DATE -90 AND 
+	reg_date < CURRENT_DATE-90 AND
+	last_click_date >= CURRENT_DATE -90 AND
+	last_open_date< CURRENT_DATE -90)
+ )
+) INHERITS (test1.t_profile_partition_months_more);
+
+CREATE TABLE test1.t_profile_partition_more_truealert_1_7 (
+CHECK (
+	(daily_job_alert = true OR
+	daily_job_alert_weekly=TRUE OR
+	daily_job_alert_monthly=TRUE OR
+	empr_job_alert = TRUE OR
+	empr_job_alert_weekly = true OR
+	empr_job_alert_monthly= TRUE)
+	AND
+	(last_login_date >= CURRENT_DATE -90 AND 
+	reg_date >= CURRENT_DATE-90 AND
+	last_click_date < CURRENT_DATE -90 AND
+	last_open_date< CURRENT_DATE -90)
+ )
+) INHERITS (test1.t_profile_partition_months_more);
+
+CREATE TABLE test1.t_profile_partition_more_truealert_1_8 (
+CHECK (
+	(daily_job_alert = true OR
+	daily_job_alert_weekly=TRUE OR
+	daily_job_alert_monthly=TRUE OR
+	empr_job_alert = TRUE OR
+	empr_job_alert_weekly = true OR
+	empr_job_alert_monthly= TRUE)
+	AND
+	(last_login_date >= CURRENT_DATE -90 AND 
+	reg_date < CURRENT_DATE-90 AND
+	last_click_date < CURRENT_DATE -90 AND
+	last_open_date< CURRENT_DATE -90)
+ )
+) INHERITS (test1.t_profile_partition_months_more);
+
+CREATE TABLE test1.t_profile_partition_more_truealert_1_9 (
+CHECK (
+	(daily_job_alert = true OR
+	daily_job_alert_weekly=TRUE OR
+	daily_job_alert_monthly=TRUE OR
+	empr_job_alert = TRUE OR
+	empr_job_alert_weekly = true OR
+	empr_job_alert_monthly= TRUE)
+	AND
+	(last_login_date < CURRENT_DATE -90 AND 
+	reg_date>=CURRENT_DATE-90 AND
+	last_click_date>=CURRENT_DATE -90 AND
+	last_open_date>=CURRENT_DATE -90)
+ )
+) INHERITS (test1.t_profile_partition_months_more);
+
+CREATE TABLE test1.t_profile_partition_more_truealert_1_10 (
+CHECK (
+	(daily_job_alert = true OR
+	daily_job_alert_weekly=TRUE OR
+	daily_job_alert_monthly=TRUE OR
+	empr_job_alert = TRUE OR
+	empr_job_alert_weekly = true OR
+	empr_job_alert_monthly= TRUE)
+	AND
+	(last_login_date < CURRENT_DATE -90 AND 
+	reg_date < CURRENT_DATE-90 AND
+	last_click_date>=CURRENT_DATE -90 AND
+	last_open_date>=CURRENT_DATE -90)
+ )
+) INHERITS (test1.t_profile_partition_months_more);
+
+CREATE TABLE test1.t_profile_partition_more_truealert_1_11 (
+CHECK (
+	(daily_job_alert = true OR
+	daily_job_alert_weekly=TRUE OR
+	daily_job_alert_monthly=TRUE OR
+	empr_job_alert = TRUE OR
+	empr_job_alert_weekly = true OR
+	empr_job_alert_monthly= TRUE)
+	AND
+	(last_login_date < CURRENT_DATE -90 AND 
+	reg_date >= CURRENT_DATE-90 AND
+	last_click_date<CURRENT_DATE -90 AND
+	last_open_date>=CURRENT_DATE -90)
+ )
+) INHERITS (test1.t_profile_partition_months_more);
+
+CREATE TABLE test1.t_profile_partition_more_truealert_1_12 (
+CHECK (
+	(daily_job_alert = true OR
+	daily_job_alert_weekly=TRUE OR
+	daily_job_alert_monthly=TRUE OR
+	empr_job_alert = TRUE OR
+	empr_job_alert_weekly = true OR
+	empr_job_alert_monthly= TRUE)
+	AND
+	(last_login_date < CURRENT_DATE -90 AND 
+	reg_date >= CURRENT_DATE-90 AND
+	last_click_date>=CURRENT_DATE -90 AND
+	last_open_date<CURRENT_DATE -90)
+ )
+) INHERITS (test1.t_profile_partition_months_more);
+
+CREATE TABLE test1.t_profile_partition_more_truealert_1_13 (
+CHECK (
+	(daily_job_alert = true OR
+	daily_job_alert_weekly=TRUE OR
+	daily_job_alert_monthly=TRUE OR
+	empr_job_alert = TRUE OR
+	empr_job_alert_weekly = true OR
+	empr_job_alert_monthly= TRUE)
+	AND
+	(last_login_date < CURRENT_DATE -90 AND 
+	reg_date < CURRENT_DATE-90 AND
+	last_click_date <CURRENT_DATE -90 AND
+	last_open_date>=CURRENT_DATE -90)
+ )
+) INHERITS (test1.t_profile_partition_months_more);
+
+CREATE TABLE test1.t_profile_partition_more_truealert_1_14 (
+CHECK (
+	(daily_job_alert = true OR
+	daily_job_alert_weekly=TRUE OR
+	daily_job_alert_monthly=TRUE OR
+	empr_job_alert = TRUE OR
+	empr_job_alert_weekly = true OR
+	empr_job_alert_monthly= TRUE)
+	AND
+	(last_login_date < CURRENT_DATE -90 AND 
+	reg_date < CURRENT_DATE-90 AND
+	last_click_date >= CURRENT_DATE -90 AND
+	last_open_date< CURRENT_DATE -90)
+ )
+) INHERITS (test1.t_profile_partition_months_more);
+
+CREATE TABLE test1.t_profile_partition_more_truealert_1_15 (
+CHECK (
+	(daily_job_alert = true OR
+	daily_job_alert_weekly=TRUE OR
+	daily_job_alert_monthly=TRUE OR
+	empr_job_alert = TRUE OR
+	empr_job_alert_weekly = true OR
+	empr_job_alert_monthly= TRUE)
+	AND
+	(last_login_date < CURRENT_DATE -90 AND 
+	reg_date >= CURRENT_DATE-90 AND
+	last_click_date < CURRENT_DATE -90 AND
+	last_open_date< CURRENT_DATE -90)
+ )
+) INHERITS (test1.t_profile_partition_months_more);
+
+CREATE TABLE test1.t_profile_partition_more_truealert_1_16 (
+CHECK (
+	(daily_job_alert = true OR
+	daily_job_alert_weekly=TRUE OR
+	daily_job_alert_monthly=TRUE OR
+	empr_job_alert = TRUE OR
+	empr_job_alert_weekly = true OR
+	empr_job_alert_monthly= TRUE)
+	AND
+	(last_login_date < CURRENT_DATE -90 AND 
+	reg_date < CURRENT_DATE-90 AND
+	last_click_date < CURRENT_DATE -90 AND
+	last_open_date< CURRENT_DATE -90)
+ )
+) INHERITS (test1.t_profile_partition_months_more);
+
+CREATE TABLE test1.t_profile_partition_more_falsealert (
+CHECK (
+	(daily_job_alert = FALSE AND
+	daily_job_alert_weekly=FALSE AND
+	daily_job_alert_monthly=FALSE AND
+	empr_job_alert = FALSE AND
+	empr_job_alert_weekly = FALSE AND
+	empr_job_alert_monthly= FALSE)
+ )
+) INHERITS (test1.t_profile_partition_months_more);
+
+CREATE OR REPLACE FUNCTION test1.t_profile_partition_months_more_insert_trigger()
+RETURNS TRIGGER AS $$
+BEGIN
+	IF ( 	
+		(NEW.daily_job_alert = true OR
+		NEW.daily_job_alert_weekly=TRUE OR
+		NEW.daily_job_alert_monthly=TRUE OR
+		NEW.empr_job_alert = TRUE OR
+		NEW.empr_job_alert_weekly = true OR
+		NEW.empr_job_alert_monthly= TRUE)
+		AND
+		(NEW.last_login_date >= CURRENT_DATE -90 AND 
+		NEW.reg_date>=CURRENT_DATE-90 AND
+		NEW.last_click_date>=CURRENT_DATE -90 AND
+		NEW.last_open_date>=CURRENT_DATE -90)
+	) THEN
+		INSERT INTO test1.t_profile_partition_more_truealert_1_1 VALUES (NEW.*);
+	ELSIF ( 	
+		(NEW.daily_job_alert = true OR
+		NEW.daily_job_alert_weekly=TRUE OR
+		NEW.daily_job_alert_monthly=TRUE OR
+		NEW.empr_job_alert = TRUE OR
+		NEW.empr_job_alert_weekly = true OR
+		NEW.empr_job_alert_monthly= TRUE)
+		AND
+		(NEW.last_login_date >= CURRENT_DATE -90 AND 
+		NEW.reg_date < CURRENT_DATE-90 AND
+		NEW.last_click_date>=CURRENT_DATE -90 AND
+		NEW.last_open_date>=CURRENT_DATE -90)
+)  THEN
+		INSERT INTO test1.t_profile_partition_more_truealert_1_2 VALUES (NEW.*);
+	ELSIF ( 	
+		(NEW.daily_job_alert = true OR
+		NEW.daily_job_alert_weekly=TRUE OR
+		NEW.daily_job_alert_monthly=TRUE OR
+		NEW.empr_job_alert = TRUE OR
+		NEW.empr_job_alert_weekly = true OR
+		NEW.empr_job_alert_monthly= TRUE)
+		AND
+		(NEW.last_login_date >= CURRENT_DATE -90 AND 
+		NEW.reg_date >= CURRENT_DATE-90 AND
+		NEW.last_click_date < CURRENT_DATE -90 AND
+		NEW.last_open_date>=CURRENT_DATE -90)
+)  THEN
+		INSERT INTO test1.t_profile_partition_more_truealert_1_3 VALUES (NEW.*);
+	ELSIF ( 	
+		(NEW.daily_job_alert = true OR
+		NEW.daily_job_alert_weekly=TRUE OR
+		NEW.daily_job_alert_monthly=TRUE OR
+		NEW.empr_job_alert = TRUE OR
+		NEW.empr_job_alert_weekly = true OR
+		NEW.empr_job_alert_monthly= TRUE)
+		AND
+		(NEW.last_login_date >= CURRENT_DATE -90 AND 
+		NEW.reg_date >= CURRENT_DATE-90 AND
+		NEW.last_click_date >= CURRENT_DATE -90 AND
+		NEW.last_open_date<CURRENT_DATE -90)
+)  THEN
+		INSERT INTO test1.t_profile_partition_more_truealert_1_4 VALUES (NEW.*);
+	ELSIF ( 	
+		(NEW.daily_job_alert = true OR
+		NEW.daily_job_alert_weekly=TRUE OR
+		NEW.daily_job_alert_monthly=TRUE OR
+		NEW.empr_job_alert = TRUE OR
+		NEW.empr_job_alert_weekly = true OR
+		NEW.empr_job_alert_monthly= TRUE)
+		AND
+		(NEW.last_login_date >= CURRENT_DATE -90 AND 
+		NEW.reg_date < CURRENT_DATE-90 AND
+		NEW.last_click_date < CURRENT_DATE -90 AND
+		NEW.last_open_date>=CURRENT_DATE -90)
+)  THEN
+		INSERT INTO test1.t_profile_partition_more_truealert_1_5 VALUES (NEW.*);
+	ELSIF ( 	
+		(NEW.daily_job_alert = true OR
+		NEW.daily_job_alert_weekly=TRUE OR
+		NEW.daily_job_alert_monthly=TRUE OR
+		NEW.empr_job_alert = TRUE OR
+		NEW.empr_job_alert_weekly = true OR
+		NEW.empr_job_alert_monthly= TRUE)
+		AND
+		(NEW.last_login_date >= CURRENT_DATE -90 AND 
+		NEW.reg_date < CURRENT_DATE-90 AND
+		NEW.last_click_date >= CURRENT_DATE -90 AND
+		NEW.last_open_date<CURRENT_DATE -90)
+)  THEN
+		INSERT INTO test1.t_profile_partition_more_truealert_1_6 VALUES (NEW.*);
+	ELSIF ( 	
+		(NEW.daily_job_alert = true OR
+		NEW.daily_job_alert_weekly=TRUE OR
+		NEW.daily_job_alert_monthly=TRUE OR
+		NEW.empr_job_alert = TRUE OR
+		NEW.empr_job_alert_weekly = true OR
+		NEW.empr_job_alert_monthly= TRUE)
+		AND
+		(NEW.last_login_date >= CURRENT_DATE -90 AND 
+		NEW.reg_date >= CURRENT_DATE-90 AND
+		NEW.last_click_date < CURRENT_DATE -90 AND
+		NEW.last_open_date< CURRENT_DATE -90)
+)  THEN
+		INSERT INTO test1.t_profile_partition_more_truealert_1_7 VALUES (NEW.*);
+	ELSIF ( 	
+		(NEW.daily_job_alert = true OR
+		NEW.daily_job_alert_weekly=TRUE OR
+		NEW.daily_job_alert_monthly=TRUE OR
+		NEW.empr_job_alert = TRUE OR
+		NEW.empr_job_alert_weekly = true OR
+		NEW.empr_job_alert_monthly= TRUE)
+		AND
+		(NEW.last_login_date >= CURRENT_DATE -90 AND 
+		NEW.reg_date < CURRENT_DATE-90 AND
+		NEW.last_click_date < CURRENT_DATE -90 AND
+		NEW.last_open_date<CURRENT_DATE -90)
+)  THEN
+		INSERT INTO test1.t_profile_partition_more_truealert_1_8 VALUES (NEW.*);
+	ELSIF ( 	
+		(NEW.daily_job_alert = true OR
+		NEW.daily_job_alert_weekly=TRUE OR
+		NEW.daily_job_alert_monthly=TRUE OR
+		NEW.empr_job_alert = TRUE OR
+		NEW.empr_job_alert_weekly = true OR
+		NEW.empr_job_alert_monthly= TRUE)
+		AND
+		(NEW.last_login_date < CURRENT_DATE -90 AND 
+		NEW.reg_date >= CURRENT_DATE-90 AND
+		NEW.last_click_date>=CURRENT_DATE -90 AND
+		NEW.last_open_date>=CURRENT_DATE -90)
+)  THEN
+		INSERT INTO test1.t_profile_partition_more_truealert_1_9 VALUES (NEW.*);
+	ELSIF ( 	
+		(NEW.daily_job_alert = true OR
+		NEW.daily_job_alert_weekly=TRUE OR
+		NEW.daily_job_alert_monthly=TRUE OR
+		NEW.empr_job_alert = TRUE OR
+		NEW.empr_job_alert_weekly = true OR
+		NEW.empr_job_alert_monthly= TRUE)
+		AND
+		(NEW.last_login_date < CURRENT_DATE -90 AND 
+		NEW.reg_date < CURRENT_DATE-90 AND
+		NEW.last_click_date>=CURRENT_DATE -90 AND
+		NEW.last_open_date>=CURRENT_DATE -90)
+)  THEN
+		INSERT INTO test1.t_profile_partition_more_truealert_1_10 VALUES (NEW.*);
+	ELSIF ( 	
+		(NEW.daily_job_alert = true OR
+		NEW.daily_job_alert_weekly=TRUE OR
+		NEW.daily_job_alert_monthly=TRUE OR
+		NEW.empr_job_alert = TRUE OR
+		NEW.empr_job_alert_weekly = true OR
+		NEW.empr_job_alert_monthly= TRUE)
+		AND
+		(NEW.last_login_date < CURRENT_DATE -90 AND 
+		NEW.reg_date >= CURRENT_DATE-90 AND
+		NEW.last_click_date < CURRENT_DATE -90 AND
+		NEW.last_open_date>=CURRENT_DATE -90)
+)  THEN
+		INSERT INTO test1.t_profile_partition_more_truealert_1_11 VALUES (NEW.*);
+	ELSIF ( 	
+		(NEW.daily_job_alert = true OR
+		NEW.daily_job_alert_weekly=TRUE OR
+		NEW.daily_job_alert_monthly=TRUE OR
+		NEW.empr_job_alert = TRUE OR
+		NEW.empr_job_alert_weekly = true OR
+		NEW.empr_job_alert_monthly= TRUE)
+		AND
+		(NEW.last_login_date < CURRENT_DATE -90 AND 
+		NEW.reg_date >= CURRENT_DATE-90 AND
+		NEW.last_click_date >= CURRENT_DATE -90 AND
+		NEW.last_open_date<CURRENT_DATE -90)
+)  THEN
+		INSERT INTO test1.t_profile_partition_more_truealert_1_12 VALUES (NEW.*);
+	ELSIF ( 	
+		(NEW.daily_job_alert = true OR
+		NEW.daily_job_alert_weekly=TRUE OR
+		NEW.daily_job_alert_monthly=TRUE OR
+		NEW.empr_job_alert = TRUE OR
+		NEW.empr_job_alert_weekly = true OR
+		NEW.empr_job_alert_monthly= TRUE)
+		AND
+		(NEW.last_login_date < CURRENT_DATE -90 AND 
+		NEW.reg_date < CURRENT_DATE-90 AND
+		NEW.last_click_date < CURRENT_DATE -90 AND
+		NEW.last_open_date>=CURRENT_DATE -90)
+)  THEN
+		INSERT INTO test1.t_profile_partition_more_truealert_1_13 VALUES (NEW.*);
+	ELSIF ( 	
+		(NEW.daily_job_alert = true OR
+		NEW.daily_job_alert_weekly=TRUE OR
+		NEW.daily_job_alert_monthly=TRUE OR
+		NEW.empr_job_alert = TRUE OR
+		NEW.empr_job_alert_weekly = true OR
+		NEW.empr_job_alert_monthly= TRUE)
+		AND
+		(NEW.last_login_date < CURRENT_DATE -90 AND 
+		NEW.reg_date < CURRENT_DATE-90 AND
+		NEW.last_click_date >= CURRENT_DATE -90 AND
+		NEW.last_open_date<CURRENT_DATE -90)
+)  THEN
+		INSERT INTO test1.t_profile_partition_more_truealert_1_14 VALUES (NEW.*);
+	ELSIF ( 	
+		(NEW.daily_job_alert = true OR
+		NEW.daily_job_alert_weekly=TRUE OR
+		NEW.daily_job_alert_monthly=TRUE OR
+		NEW.empr_job_alert = TRUE OR
+		NEW.empr_job_alert_weekly = true OR
+		NEW.empr_job_alert_monthly= TRUE)
+		AND
+		(NEW.last_login_date < CURRENT_DATE -90 AND 
+		NEW.reg_date >= CURRENT_DATE-90 AND
+		NEW.last_click_date < CURRENT_DATE -90 AND
+		NEW.last_open_date<CURRENT_DATE -90)
+)  THEN
+		INSERT INTO test1.t_profile_partition_more_truealert_1_15 VALUES (NEW.*);
+	ELSIF ( 	
+		(NEW.daily_job_alert = true OR
+		NEW.daily_job_alert_weekly=TRUE OR
+		NEW.daily_job_alert_monthly=TRUE OR
+		NEW.empr_job_alert = TRUE OR
+		NEW.empr_job_alert_weekly = true OR
+		NEW.empr_job_alert_monthly= TRUE)
+		AND
+		(NEW.last_login_date < CURRENT_DATE -90 AND 
+		NEW.reg_date < CURRENT_DATE-90 AND
+		NEW.last_click_date < CURRENT_DATE -90 AND
+		NEW.last_open_date<CURRENT_DATE -90)
+)  THEN
+		INSERT INTO test1.t_profile_partition_more_truealert_1_16 VALUES (NEW.*);
+	ELSIF ( 	(NEW.daily_job_alert = FALSE AND
+		NEW.daily_job_alert_weekly=FALSE AND
+		NEW.daily_job_alert_monthly=FALSE AND
+		NEW.empr_job_alert = FALSE AND
+		NEW.empr_job_alert_weekly = FALSE AND
+		NEW.empr_job_alert_monthly= FALSE)
+	)  THEN
+		INSERT INTO test1.t_profile_partition_more_falsealert VALUES (NEW.*);
+	ELSE
+		RAISE EXCEPTION 'incorrect. Fix the t_profile_partition_months_insert_trigger()!';
+	END IF;
+	RETURN NULL;
+END;
+$$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER insert_t_profile_partition_months_more_trigger
+BEFORE INSERT ON test1.t_profile_partition_months_more
+FOR EACH ROW EXECUTE PROCEDURE test1.t_profile_partition_months_more_insert_trigger();
+
