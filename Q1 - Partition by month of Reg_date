@@ -1,0 +1,400 @@
+drop table IF EXISTS test1.t_profile_partition_months CASCADE;
+
+CREATE TABLE test1.t_profile_partition_months (
+	jskr_id VARCHAR (50) NOT NULL,
+	email_address VARCHAR (100) NOT NULL,
+	first_name VARCHAR (50) NOT NULL,
+	last_name VARCHAR (50) NOT NULL,
+	"state" VARCHAR (50) NOT NULL,
+	city VARCHAR (50) NOT NULL,
+	zip_code VARCHAR (5) NOT NULL,
+	birth_date DATE NULL,
+	reg_date DATE NOT NULL,
+	last_login_date DATE NULL,
+	job_exp_level int4 NULL,
+	edu_level int4 NULL,
+	daily_job_alert BOOLEAN NULL,
+	daily_job_alert_weekly BOOLEAN NULL,
+	daily_job_alert_monthly BOOLEAN NULL,
+	empr_job_alert BOOLEAN NULL,
+	empr_job_alert_weekly BOOLEAN NULL,
+	empr_job_alert_monthly BOOLEAN NULL,
+	recu_alert BOOLEAN NULL,
+	recu_alert_weekly BOOLEAN NULL,
+	recu_alert_monthly BOOLEAN NULL,
+	parn_alert BOOLEAN NULL,
+	avail_mod_complete BOOLEAN NULL,
+	mon_mod_complete BOOLEAN NULL,
+	video_mod_complete BOOLEAN NULL,
+	work_hist_mod_complete BOOLEAN NULL,
+	edu_mod_complete BOOLEAN NULL,
+	refer_mod_complete BOOLEAN NULL,
+	visua_mod_complete BOOLEAN NULL,
+	drv_mod_complete BOOLEAN NULL,
+	mgr_mod_complete BOOLEAN NULL,
+	prof_percent_complete BOOLEAN NULL,
+	email_enga_score float8 NULL,
+	app_sub_count int4 NOT NULL,
+	sync_time TIMESTAMP (6) NOT NULL,
+	gender VARCHAR (50),
+	prof_update_date DATE,
+	Last_open_date DATE,
+	Last_Click_Date DATE,
+	Last_Application_Date DATE,
+	Last_send_date DATE,	
+	PRIMARY KEY (jskr_id)
+) WITH (OIDS = FALSE)
+;
+
+CREATE TABLE test1.t_profile_partition_m1 (
+CHECK (Extract(MONTH from reg_date) =1 )
+) INHERITS (test1.t_profile_partition_months);
+
+CREATE TABLE test1.t_profile_partition_m2 (
+CHECK (Extract(MONTH from reg_date) =2 )
+) INHERITS (test1.t_profile_partition_months);
+
+CREATE TABLE test1.t_profile_partition_m3 (
+CHECK (Extract(MONTH from reg_date) =3 )
+) INHERITS (test1.t_profile_partition_months);
+
+CREATE TABLE test1.t_profile_partition_m4 (
+CHECK (Extract(MONTH from reg_date) =4 )
+) INHERITS (test1.t_profile_partition_months);
+
+CREATE TABLE test1.t_profile_partition_m5 (
+CHECK (Extract(MONTH from reg_date) =5 )
+) INHERITS (test1.t_profile_partition_months);
+
+CREATE TABLE test1.t_profile_partition_m6 (
+CHECK (Extract(MONTH from reg_date) =6 )
+) INHERITS (test1.t_profile_partition_months);
+
+CREATE TABLE test1.t_profile_partition_m7 (
+CHECK (Extract(MONTH from reg_date) =7 )
+) INHERITS (test1.t_profile_partition_months);
+
+CREATE TABLE test1.t_profile_partition_m8 (
+CHECK (Extract(MONTH from reg_date) =8 )
+) INHERITS (test1.t_profile_partition_months);
+
+CREATE TABLE test1.t_profile_partition_m9 (
+CHECK (Extract(MONTH from reg_date) =9 )
+) INHERITS (test1.t_profile_partition_months);
+
+CREATE TABLE test1.t_profile_partition_m10 (
+CHECK (Extract(MONTH from reg_date) =10 )
+) INHERITS (test1.t_profile_partition_months);
+
+CREATE TABLE test1.t_profile_partition_m11 (
+CHECK (Extract(MONTH from reg_date) =11 )
+) INHERITS (test1.t_profile_partition_months);
+
+CREATE TABLE test1.t_profile_partition_m12 (
+CHECK (Extract(MONTH from reg_date) =12 )
+) INHERITS (test1.t_profile_partition_months);
+
+
+Create Index index_01_t_profile_partition_m1 on test1.t_profile_partition_m1 (
+	last_login_date,
+	Last_Application_Date,
+	reg_date,
+	Last_Click_Date,
+	Last_open_date,
+	Last_Click_Date,
+	Last_send_date);
+
+Create Index index_02_t_profile_partition_m1 on test1.t_profile_partition_m1 (
+	daily_job_alert,
+	daily_job_alert_weekly,
+	empr_job_alert,
+	empr_job_alert_weekly,
+	empr_job_alert_monthly);
+
+-- Create Index index_03_t_profile_partition_m1 on test1.t_profile_partition_m1(
+-- 	zip_code,
+-- 	"state",
+-- 	email_address
+-- );
+-- 
+-- Create Index index_01_t_profile_partition_m2 on test1.t_profile_partition_m2 (
+-- 	last_login_date,
+-- 	Last_Application_Date,
+-- 	reg_date,
+-- 	Last_Click_Date,
+-- 	Last_open_date,
+-- 	Last_Click_Date,
+-- 	Last_send_date);
+-- 
+-- Create Index index_02_t_profile_partition_m2 on test1.t_profile_partition_m2 (
+-- 	daily_job_alert,
+-- 	daily_job_alert_weekly,
+-- 	empr_job_alert,
+-- 	empr_job_alert_weekly,
+-- 	empr_job_alert_monthly);
+-- 
+-- Create Index index_03_t_profile_partition_m2 on test1.t_profile_partition_m2(
+-- 	zip_code,
+-- 	"state",
+-- 	email_address
+-- );
+-- 
+-- Create Index index_01_t_profile_partition_m3 on test1.t_profile_partition_m3 (
+-- 	last_login_date,
+-- 	Last_Application_Date,
+-- 	reg_date,
+-- 	Last_Click_Date,
+-- 	Last_open_date,
+-- 	Last_Click_Date,
+-- 	Last_send_date);
+-- 
+-- Create Index index_02_t_profile_partition_m3 on test1.t_profile_partition_m3 (
+-- 	daily_job_alert,
+-- 	daily_job_alert_weekly,
+-- 	empr_job_alert,
+-- 	empr_job_alert_weekly,
+-- 	empr_job_alert_monthly);
+-- 
+-- Create Index index_03_t_profile_partition_m3 on test1.t_profile_partition_m3(
+-- 	zip_code,
+-- 	"state",
+-- 	email_address
+-- );
+-- 
+-- Create Index index_01_t_profile_partition_m4 on test1.t_profile_partition_m4 (
+-- 	last_login_date,
+-- 	Last_Application_Date,
+-- 	reg_date,
+-- 	Last_Click_Date,
+-- 	Last_open_date,
+-- 	Last_Click_Date,
+-- 	Last_send_date);
+-- 
+-- Create Index index_02_t_profile_partition_m4 on test1.t_profile_partition_m4 (
+-- 	daily_job_alert,
+-- 	daily_job_alert_weekly,
+-- 	empr_job_alert,
+-- 	empr_job_alert_weekly,
+-- 	empr_job_alert_monthly);
+-- 
+-- Create Index index_03_t_profile_partition_m4 on test1.t_profile_partition_m4(
+-- 	zip_code,
+-- 	"state",
+-- 	email_address
+-- );
+-- 
+-- Create Index index_01_t_profile_partition_m5 on test1.t_profile_partition_m5 (
+-- 	last_login_date,
+-- 	Last_Application_Date,
+-- 	reg_date,
+-- 	Last_Click_Date,
+-- 	Last_open_date,
+-- 	Last_Click_Date,
+-- 	Last_send_date);
+-- 
+-- Create Index index_02_t_profile_partition_m5 on test1.t_profile_partition_m5 (
+-- 	daily_job_alert,
+-- 	daily_job_alert_weekly,
+-- 	empr_job_alert,
+-- 	empr_job_alert_weekly,
+-- 	empr_job_alert_monthly);
+-- 
+-- Create Index index_03_t_profile_partition_m5 on test1.t_profile_partition_m5(
+-- 	zip_code,
+-- 	"state",
+-- 	email_address
+-- );
+-- 
+-- Create Index index_01_t_profile_partition_m6 on test1.t_profile_partition_m6 (
+-- 	last_login_date,
+-- 	Last_Application_Date,
+-- 	reg_date,
+-- 	Last_Click_Date,
+-- 	Last_open_date,
+-- 	Last_Click_Date,
+-- 	Last_send_date);
+-- 
+-- Create Index index_02_t_profile_partition_m6 on test1.t_profile_partition_m6 (
+-- 	daily_job_alert,
+-- 	daily_job_alert_weekly,
+-- 	empr_job_alert,
+-- 	empr_job_alert_weekly,
+-- 	empr_job_alert_monthly);
+-- 
+-- Create Index index_03_t_profile_partition_m6 on test1.t_profile_partition_m6(
+-- 	zip_code,
+-- 	"state",
+-- 	email_address
+-- );
+-- 
+-- Create Index index_01_t_profile_partition_m7 on test1.t_profile_partition_m7 (
+-- 	last_login_date,
+-- 	Last_Application_Date,
+-- 	reg_date,
+-- 	Last_Click_Date,
+-- 	Last_open_date,
+-- 	Last_Click_Date,
+-- 	Last_send_date);
+-- 
+-- Create Index index_02_t_profile_partition_m7 on test1.t_profile_partition_m7 (
+-- 	daily_job_alert,
+-- 	daily_job_alert_weekly,
+-- 	empr_job_alert,
+-- 	empr_job_alert_weekly,
+-- 	empr_job_alert_monthly);
+-- 
+-- Create Index index_03_t_profile_partition_m7 on test1.t_profile_partition_m7(
+-- 	zip_code,
+-- 	"state",
+-- 	email_address
+-- );
+-- 
+-- Create Index index_01_t_profile_partition_m8 on test1.t_profile_partition_m8 (
+-- 	last_login_date,
+-- 	Last_Application_Date,
+-- 	reg_date,
+-- 	Last_Click_Date,
+-- 	Last_open_date,
+-- 	Last_Click_Date,
+-- 	Last_send_date);
+-- 
+-- Create Index index_02_t_profile_partition_m8 on test1.t_profile_partition_m8 (
+-- 	daily_job_alert,
+-- 	daily_job_alert_weekly,
+-- 	empr_job_alert,
+-- 	empr_job_alert_weekly,
+-- 	empr_job_alert_monthly);
+-- 
+-- Create Index index_03_t_profile_partition_m8 on test1.t_profile_partition_m8(
+-- 	zip_code,
+-- 	"state",
+-- 	email_address
+-- );
+-- 
+-- Create Index index_01_t_profile_partition_m9 on test1.t_profile_partition_m9 (
+-- 	last_login_date,
+-- 	Last_Application_Date,
+-- 	reg_date,
+-- 	Last_Click_Date,
+-- 	Last_open_date,
+-- 	Last_Click_Date,
+-- 	Last_send_date);
+-- 
+-- Create Index index_02_t_profile_partition_m9 on test1.t_profile_partition_m9 (
+-- 	daily_job_alert,
+-- 	daily_job_alert_weekly,
+-- 	empr_job_alert,
+-- 	empr_job_alert_weekly,
+-- 	empr_job_alert_monthly);
+-- 
+-- Create Index index_03_t_profile_partition_m9 on test1.t_profile_partition_m9(
+-- 	zip_code,
+-- 	"state",
+-- 	email_address
+-- );
+-- 
+-- Create Index index_01_t_profile_partition_m10 on test1.t_profile_partition_m10 (
+-- 	last_login_date,
+-- 	Last_Application_Date,
+-- 	reg_date,
+-- 	Last_Click_Date,
+-- 	Last_open_date,
+-- 	Last_Click_Date,
+-- 	Last_send_date);
+-- 
+-- Create Index index_02_t_profile_partition_m10 on test1.t_profile_partition_m10 (
+-- 	daily_job_alert,
+-- 	daily_job_alert_weekly,
+-- 	empr_job_alert,
+-- 	empr_job_alert_weekly,
+-- 	empr_job_alert_monthly);
+-- 
+-- Create Index index_03_t_profile_partition_m10 on test1.t_profile_partition_m10(
+-- 	zip_code,
+-- 	"state",
+-- 	email_address
+-- );
+-- 
+-- Create Index index_01_t_profile_partition_m11 on test1.t_profile_partition_m11 (
+-- 	last_login_date,
+-- 	Last_Application_Date,
+-- 	reg_date,
+-- 	Last_Click_Date,
+-- 	Last_open_date,
+-- 	Last_Click_Date,
+-- 	Last_send_date);
+-- 
+-- Create Index index_02_t_profile_partition_m11 on test1.t_profile_partition_m11 (
+-- 	daily_job_alert,
+-- 	daily_job_alert_weekly,
+-- 	empr_job_alert,
+-- 	empr_job_alert_weekly,
+-- 	empr_job_alert_monthly);
+-- 
+-- Create Index index_03_t_profile_partition_m11 on test1.t_profile_partition_m11(
+-- 	zip_code,
+-- 	"state",
+-- 	email_address
+-- );
+-- 
+-- Create Index index_01_t_profile_partition_m12 on test1.t_profile_partition_m12 (
+-- 	last_login_date,
+-- 	Last_Application_Date,
+-- 	reg_date,
+-- 	Last_Click_Date,
+-- 	Last_open_date,
+-- 	Last_Click_Date,
+-- 	Last_send_date);
+-- 
+-- Create Index index_02_t_profile_partition_m12 on test1.t_profile_partition_m12 (
+-- 	daily_job_alert,
+-- 	daily_job_alert_weekly,
+-- 	empr_job_alert,
+-- 	empr_job_alert_weekly,
+-- 	empr_job_alert_monthly);
+-- 
+-- Create Index index_03_t_profile_partition_m12 on test1.t_profile_partition_m12(
+-- 	zip_code,
+-- 	"state",
+-- 	email_address
+-- );
+-- 
+CREATE OR REPLACE FUNCTION test1.t_profile_partition_months_insert_trigger()
+RETURNS TRIGGER AS $$
+BEGIN
+	IF ( Extract(MONTH from NEW.reg_date) = 1) THEN
+		INSERT INTO test1.t_profile_partition_m1 VALUES (NEW.*);
+	ELSIF ( Extract(MONTH from NEW.reg_date) = 2)  THEN
+		INSERT INTO test1.t_profile_partition_m2 VALUES (NEW.*);
+	ELSIF ( Extract(MONTH from NEW.reg_date) = 3)  THEN
+		INSERT INTO test1.t_profile_partition_m3 VALUES (NEW.*);
+	ELSIF ( Extract(MONTH from NEW.reg_date) = 4)  THEN
+		INSERT INTO test1.t_profile_partition_m4 VALUES (NEW.*);
+	ELSIF ( Extract(MONTH from NEW.reg_date) = 5)  THEN
+		INSERT INTO test1.t_profile_partition_m5 VALUES (NEW.*);
+	ELSIF ( Extract(MONTH from NEW.reg_date) = 6)  THEN
+		INSERT INTO test1.t_profile_partition_m6 VALUES (NEW.*);
+	ELSIF ( Extract(MONTH from NEW.reg_date) = 7)  THEN
+		INSERT INTO test1.t_profile_partition_m7 VALUES (NEW.*);
+	ELSIF ( Extract(MONTH from NEW.reg_date) = 8)  THEN
+		INSERT INTO test1.t_profile_partition_m8 VALUES (NEW.*);
+	ELSIF ( Extract(MONTH from NEW.reg_date) = 9)  THEN
+		INSERT INTO test1.t_profile_partition_m9 VALUES (NEW.*);
+	ELSIF ( Extract(MONTH from NEW.reg_date) = 10)  THEN
+		INSERT INTO test1.t_profile_partition_m10 VALUES (NEW.*);
+	ELSIF ( Extract(MONTH from NEW.reg_date) = 11)  THEN
+		INSERT INTO test1.t_profile_partition_m11 VALUES (NEW.*);
+	ELSIF ( Extract(MONTH from NEW.reg_date) = 12)  THEN
+		INSERT INTO test1.t_profile_partition_m12 VALUES (NEW.*);
+	ELSE
+		RAISE EXCEPTION 'incorrect. Fix the t_profile_partition_months_insert_trigger()!';
+	END IF;
+	RETURN NULL;
+END;
+$$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER insert_t_profile_partition_month_trigger
+BEFORE INSERT ON test1.t_profile_partition_months
+FOR EACH ROW EXECUTE PROCEDURE test1.t_profile_partition_months_insert_trigger();
+
