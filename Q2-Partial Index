@@ -1,0 +1,27 @@
+Create index Q2_index_t_profile_active_test_inactive on t_profile_active_test_inactive (
+	last_open_date,
+	last_click_date,
+	last_application_date,
+	reg_date,
+	empr_job_alert,
+	birth_date, 
+	zip_code
+)
+WHERE
+	empr_job_alert = TRUE AND
+	(birth_date >'6/24/2016'::DATE -5840 OR birth_date is NULL)
+;
+
+Create index Q2_index_t_profile_active_test_active on t_profile_active_test_active (
+	last_open_date,
+	last_click_date,
+	last_application_date,
+	reg_date,
+	empr_job_alert,
+	birth_date, 
+	zip_code
+)
+WHERE
+	empr_job_alert = TRUE AND
+	(birth_date >'6/24/2016'::DATE -5840 OR birth_date is NULL)
+;
