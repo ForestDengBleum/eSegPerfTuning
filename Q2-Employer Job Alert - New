@@ -1,0 +1,30 @@
+SELECT
+	count(profile.jskr_id)
+FROM
+	t_profile_active_test profile
+WHERE
+	(last_open_date >= '6/1/2016'::DATE - 60 OR
+	 last_click_date >= '6/1/2016'::DATE - 60 OR
+	 last_application_date >= '6/1/2016'::DATE -60 OR
+	 reg_date>= '6/1/2016'::DATE - 60) AND
+	(
+		Profile.empr_job_alert = TRUE
+		--OR Profile.empr_job_alert_weekly = TRUE
+		--OR Profile.empr_job_alert_monthly = TRUE
+	)
+AND (
+	Profile.birth_date > '6/24/2016'::DATE - 5840
+	OR Profile.birth_date IS NULL
+)
+AND profile.zip_code IN (
+	SELECT DISTINCT
+		"To_ZIPCODE"
+	FROM
+		test1."T_ZIP_Neighborhood" A
+	INNER JOIN test1."T_RGIS" b ON A ."From_ZIPCODE" = b."RGIS_ZIPCODE"
+	INNER JOIN test1.t_job_posting C ON A ."From_ZIPCODE" = C ."zip_code"
+	WHERE
+		A ."Distance" <= 15
+	AND C .brand_temp_id IN (11809, 11520, 1143, 11502)
+	AND C .industry_id = 77
+);
