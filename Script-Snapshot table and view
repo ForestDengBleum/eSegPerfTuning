@@ -58,7 +58,7 @@ Alter table t_Snapshot_Profile_A_Active add CONSTRAINT c1_A Check
 
 Alter table t_Snapshot_Profile_A_Active INHERIT t_Snapshot_Profile_A;
 
--- Active PARTITION (Active Jobseeker)
+-- Inactive PARTITION 
 Create table t_Snapshot_Profile_A_Inactive (like t_Snapshot_Profile_A including DEFAULTS INCLUDING CONSTRAINTS);
 
 Alter table t_Snapshot_Profile_A_Inactive add CONSTRAINT c2_A Check
@@ -121,12 +121,15 @@ FROM
 
 --Create INDEXES
 
-Drop INDEX IF EXISTS Index_zipcode_t_Snapshot_Profile_A;
-Create index Index_zipcode_t_Snapshot_Profile_A on t_Snapshot_Profile_A (
+Drop INDEX IF EXISTS Index_zipcode_t_Snapshot_Profile_A_Active;
+Create index Index_zipcode_t_Snapshot_Profile_A_Active on t_Snapshot_Profile_A_Active (
 	zip_code
 )
 ;
-
+Drop INDEX IF EXISTS Index_zipcode_t_Snapshot_Profile_A_Inactive;
+Create index Index_zipcode_t_Snapshot_Profile_A_Inactive on t_Snapshot_Profile_A_Inactive (
+	zip_code
+);
 
 --Create Snapshot B table
 
@@ -187,7 +190,7 @@ Alter table t_Snapshot_Profile_B_Active add CONSTRAINT c1_B Check
 
 Alter table t_Snapshot_Profile_B_Active INHERIT t_Snapshot_Profile_B;
 
--- Inactive PARTITION (Active Jobseeker)
+-- Inactive PARTITION
 Create table t_Snapshot_Profile_B_Inactive (like t_Snapshot_Profile_B including DEFAULTS INCLUDING CONSTRAINTS);
 
 Alter table t_Snapshot_Profile_B_Inactive add CONSTRAINT c2_B Check
@@ -251,11 +254,15 @@ FROM
 
 --Create INDEXES
 
-Drop INDEX IF EXISTS Index_zipcode_t_Snapshot_Profile_B;
-Create index Index_zipcode_t_Snapshot_Profile_B on t_Snapshot_Profile_B (
+Drop INDEX IF EXISTS Index_zipcode_t_Snapshot_Profile_B_Active;
+Create index Index_zipcode_t_Snapshot_Profile_B_Active on t_Snapshot_Profile_B_Active (
 	zip_code
 )
 ;
+Drop INDEX IF EXISTS Index_zipcode_t_Snapshot_Profile_B_Inactive;
+Create index Index_zipcode_t_Snapshot_Profile_B_Inactive on t_Snapshot_Profile_B_Inactive (
+	zip_code
+);
 
 --Create VIEW
 Drop view if EXISTS v_profiles;
