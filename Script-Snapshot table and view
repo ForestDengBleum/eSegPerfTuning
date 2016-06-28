@@ -50,6 +50,22 @@ CREATE TABLE t_Snapshot_Profile_A (
 	PRIMARY KEY (jskr_id)
 ) WITH (OIDS = FALSE);
 
+-- Active PARTITION (Active Jobseeker)
+Create table t_Snapshot_Profile_A_Active (like t_Snapshot_Profile_A including DEFAULTS INCLUDING CONSTRAINTS);
+
+Alter table t_Snapshot_Profile_A_Active add CONSTRAINT c1_A Check
+	(ActivityLevel = TRUE);
+
+Alter table t_Snapshot_Profile_A_Active INHERIT t_Snapshot_Profile_A;
+
+-- Active PARTITION (Active Jobseeker)
+Create table t_Snapshot_Profile_A_Inactive (like t_Snapshot_Profile_A including DEFAULTS INCLUDING CONSTRAINTS);
+
+Alter table t_Snapshot_Profile_A_Inactive add CONSTRAINT c2_A Check
+	(ActivityLevel = FALSE);
+
+Alter table t_Snapshot_Profile_A_Inactive INHERIT t_Snapshot_Profile_A;
+
 --Insert Data
 INSERT INTO t_Snapshot_Profile_A SELECT
 	profile.jskr_id jskr_id,
@@ -310,6 +326,23 @@ CREATE TABLE t_Snapshot_Profile_B (
 	ActivityLevel BOOLEAN,
 	PRIMARY KEY (jskr_id)
 ) WITH (OIDS = FALSE);
+
+-- Active PARTITION (Active Jobseeker)
+Create table t_Snapshot_Profile_B_Active (like t_Snapshot_Profile_B including DEFAULTS INCLUDING CONSTRAINTS);
+
+Alter table t_Snapshot_Profile_B_Active add CONSTRAINT c1_B Check
+	(ActivityLevel = TRUE);
+
+Alter table t_Snapshot_Profile_B_Active INHERIT t_Snapshot_Profile_B;
+
+-- Inactive PARTITION (Active Jobseeker)
+Create table t_Snapshot_Profile_B_Inactive (like t_Snapshot_Profile_B including DEFAULTS INCLUDING CONSTRAINTS);
+
+Alter table t_Snapshot_Profile_B_Inactive add CONSTRAINT c2_B Check
+	(ActivityLevel = FALSE);
+
+Alter table t_Snapshot_Profile_B_Inactive INHERIT t_Snapshot_Profile_B;
+
 
 --Insert Data
 INSERT INTO t_Snapshot_Profile_B SELECT
