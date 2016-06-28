@@ -1,0 +1,359 @@
+SET constraint_exclusion = on;
+
+--Query 1 Daily Job Alert
+
+SELECT
+	Count(profile.jskr_id)
+FROM
+	test1.t_profile_active_test profile
+WHERE
+	(
+		Profile.last_open_date >= CURRENT_DATE - 60
+		OR Profile.Last_Click_Date >= CURRENT_DATE - 60
+		OR Profile.Last_Application_Date >= CURRENT_DATE - 14
+		OR Profile.reg_date >= CURRENT_DATE - 14
+		OR Profile.update_date >= CURRENT_DATE - 60
+	)
+	AND
+	profile.daily_job_alert = TRUE
+	AND
+	profile.zip_code IN (
+		SELECT DISTINCT
+			"To_ZIPCODE"
+		FROM
+			test1."T_ZIP_Neighborhood" A
+		INNER JOIN test1."T_RGIS" b ON A ."From_ZIPCODE" = b."RGIS_ZIPCODE" --where a."Distance" <=50
+	)
+	AND profile. STATE IN (
+	'state_5',
+	'state_7',
+	'state_10',
+	'state_12',
+	'state_18',
+	'state_20',
+	'state_25',
+	'state_30'
+	)
+	AND
+	Profile.ActivityLevel = TRUE
+;
+
+--Query 2 Daily Job Alert - Gmail AOL no opens in last 30 days
+
+SELECT
+	Count(profile.jskr_id)
+FROM
+	test1.t_profile_active_test profile
+WHERE
+	(
+		Profile.last_open_date >= CURRENT_DATE - 60
+		OR Profile.Last_Click_Date >= CURRENT_DATE - 60
+		OR Profile.Last_Application_Date >= CURRENT_DATE - 14
+		OR Profile.update_date >= CURRENT_DATE - 60
+	)
+	AND
+		Profile.last_open_date <= CURRENT_DATE -30
+	AND
+		Profile.last_click_date <= CURRENT_DATE - 30
+	AND
+		Profile.update_date <= CURRENT_DATE - 30
+	AND
+	profile.daily_job_alert = TRUE
+	AND
+	profile.zip_code IN (
+		SELECT DISTINCT
+			"To_ZIPCODE"
+		FROM
+			test1."T_ZIP_Neighborhood" A
+		INNER JOIN test1."T_RGIS" b ON A ."From_ZIPCODE" = b."RGIS_ZIPCODE" --where a."Distance" <=50
+	)
+	AND 
+	profile.email_address !~* '(aol.com|gmail.com)'
+	AND
+	Profile.ActivityLevel = TRUE
+;
+
+
+--Query 3 Employer Job Alert (postings)
+
+SELECT
+	Count(profile.jskr_id)
+FROM
+	test1.t_profile_active_test profile
+WHERE
+	(Profile.last_open_date>=CURRENT_DATE -60
+	 OR Profile.last_click_date >= CURRENT_DATE -60
+	 OR Profile.last_application_date >= CURRENT_DATE -60
+	 OR Profile.reg_date >= CURRENT_DATE - 60
+	)
+	AND
+		Profile.empr_job_alert = TRUE
+	AND 
+	(
+		Profile.birth_date > CURRENT_DATE - 5840
+		OR Profile.birth_date IS NULL
+	)
+	AND profile.zip_code IN (
+	SELECT DISTINCT
+		"To_ZIPCODE"
+	FROM
+		test1."T_ZIP_Neighborhood" A
+	INNER JOIN test1."T_RGIS" b ON A ."From_ZIPCODE" = b."RGIS_ZIPCODE"
+	INNER JOIN test1.t_job_posting C ON A ."From_ZIPCODE" = C ."zip_code"
+	WHERE
+		A ."Distance" <= 15
+	AND C .brand_temp_id IN (11809, 11520, 1143, 11502)
+	AND C .industry_id = 77
+	)
+	AND
+	Profile.ActivityLevel = TRUE
+;
+
+--Q4 Employer Job Alert (ZIPs)
+
+SELECT
+	Count(profile.jskr_id)
+FROM
+	test1.t_profile_active_test profile
+WHERE
+	(
+		Profile.last_open_date >= CURRENT_DATE - 60
+		OR Profile.last_click_date >= CURRENT_DATE - 60
+		OR Profile.Last_application_Date >= CURRENT_DATE - 60
+		OR Profile.reg_date >= CURRENT_DATE - 60
+	)
+AND 
+	Profile.empr_job_alert = TRUE
+AND (
+	Profile.birth_date > CURRENT_DATE - 5840
+	OR Profile.birth_date IS NULL
+)
+AND profile.zip_code IN (
+	SELECT DISTINCT
+		"To_ZIPCODE"
+	FROM
+		test1."T_ZIP_Neighborhood" A
+	WHERE
+		A ."Distance" <= 15
+	AND A ."From_ZIPCODE" IN (
+		'78550',
+		'80521',
+		'83814',
+		'83835',
+		'99016'
+		)
+	)
+	AND
+	Profile.ActivityLevel = TRUE
+;
+
+--Q5 Birthday
+
+SELECT
+	Count(profile.jskr_id)
+FROM
+	test1.t_profile_active_test profile
+WHERE
+	(
+		Profile.last_open_date >= CURRENT_DATE - 60
+		OR Profile.last_click_date >= CURRENT_DATE - 60
+		OR Profile.Last_application_Date >= CURRENT_DATE - 60
+		OR Profile.reg_date >= CURRENT_DATE - 60
+	)
+	AND 
+		(profile.daily_job_alert = TRUE
+		 OR Profile.empr_job_alert = TRUE
+		)
+	AND to_Char(Profile.birth_date, 'DDMM') = to_char(CURRENT_DATE, 'DDMM')
+	AND
+	Profile.ActivityLevel = TRUE
+;
+
+--Q6 Response Model
+
+SELECT
+	Count(profile.jskr_id)
+FROM
+	(select jskr_id, 
+					daily_job_alert, 
+					Last_open_date,
+					Last_click_date,
+					Last_application_date,
+					reg_date,
+					email_enga_score,
+					ActivityLevel
+	 from test1.t_profile_active_test order by email_enga_score
+	 LIMIT (select count(1)*0.2::integer from test1.t_profile_active_test)) profile
+WHERE
+	(
+		Profile.last_open_date >= CURRENT_DATE - 60
+		OR Profile.last_click_date >= CURRENT_DATE - 60
+		OR Profile.Last_application_Date >= CURRENT_DATE - 60
+		OR Profile.reg_date >= CURRENT_DATE - 60
+	)
+	AND
+		profile.daily_job_alert = TRUE
+	AND
+		Profile.ActivityLevel = TRUE;
+
+--Q7 Welcome Day 2
+
+SELECT
+	Count(profile.jskr_id)
+FROM
+	test1.t_profile_active_test profile
+WHERE
+	profile.daily_job_alert = TRUE
+	AND 
+	Profile.reg_date = CURRENT_DATE - 1;
+
+--Q8 Daily Job Alert (Send Date)
+
+SELECT
+	Count(profile.jskr_id)
+FROM
+	test1.t_profile_active_test profile
+WHERE
+	(
+		Profile.Last_Application_Date >= CURRENT_DATE - 14
+		OR Profile.update_date >= CURRENT_DATE - 60
+		OR Profile.Last_send_date >= CURRENT_DATE - 60
+	)
+	AND 
+		Profile.Last_open_date <= CURRENT_DATE - 30
+	AND 
+		Profile.Last_Click_Date <= CURRENT_DATE - 30
+	AND 
+		Profile.reg_date < CURRENT_DATE - 14
+	AND
+		Profile.update_date <= CURRENT_DATE -30
+	AND 
+		profile.daily_job_alert = TRUE
+	AND profile.zip_code IN (
+	SELECT DISTINCT
+		"To_ZIPCODE"
+	FROM
+		test1."T_ZIP_Neighborhood" A
+	INNER JOIN test1."T_RGIS" b ON A ."From_ZIPCODE" = b."RGIS_ZIPCODE" --where a."Distance" <=50
+	)
+	AND profile. STATE IN (
+	'state_1',
+	'state_5',
+	'state_7',
+	'state_10',
+	'state_12',
+	'state_18',
+	'state_42'
+)
+	AND 
+		profile.email_address !~* '(aol.com|gmail.com)'
+	AND
+		profile.ActivityLevel = TRUE
+;
+
+--Query 9 Welcome Day 6
+
+SELECT
+	Count(profile.jskr_id)
+FROM
+	test1.t_profile_active_test profile
+WHERE
+	Profile.reg_date < CURRENT_DATE - 6
+AND (
+	profile.daily_job_alert = TRUE
+	OR profile.daily_job_alert_weekly = TRUE
+	OR (
+		Profile.empr_job_alert = TRUE
+		OR Profile.empr_job_alert_weekly = TRUE
+		OR Profile.empr_job_alert_monthly = TRUE
+	)
+);
+
+--Q10 Winback 180
+
+SELECT
+	Count(profile.jskr_id)
+FROM
+	test1.t_profile_active_test profile
+WHERE
+		Profile.Last_open_date < CURRENT_DATE - 180
+	AND 
+		Profile.Last_Click_Date < CURRENT_DATE - 180
+	AND	
+		Profile.Last_Application_Date > CURRENT_DATE - 180
+	AND (
+		profile.daily_job_alert = TRUE
+		OR profile.daily_job_alert_weekly = TRUE
+		OR Profile.empr_job_alert = TRUE
+		)
+;
+
+--Q11 Winback Day 1
+
+SELECT
+	Count(profile.jskr_id)
+FROM
+	test1.t_profile_active_test profile
+WHERE
+	(
+		Profile.Last_Application_Date BETWEEN CURRENT_DATE - 90
+		AND CURRENT_DATE - 30
+		OR Profile.Last_open_date BETWEEN CURRENT_DATE - 90
+		AND CURRENT_DATE - 60
+		OR profile.Last_open_date IS NULL
+		OR Profile.Last_Click_Date BETWEEN CURRENT_DATE - 90
+		AND CURRENT_DATE - 60
+		OR Profile.last_click_date IS NULL
+	)
+	AND (
+		profile.daily_job_alert = TRUE
+		OR profile.daily_job_alert_weekly = TRUE
+		OR Profile.empr_job_alert = TRUE
+	)
+;
+
+--Query 12 Daily Job Alert 
+
+SELECT
+	Count(profile.jskr_id)
+FROM
+	test1.t_profile_active_test profile
+WHERE
+	(
+		Profile.last_open_date >= CURRENT_DATE - 60
+		OR Profile.Last_Click_Date >= CURRENT_DATE - 60
+		OR Profile.Last_Application_Date >= CURRENT_DATE - 14
+		OR Profile.update_date >= CURRENT_DATE - 60
+		OR Profile.reg_date >= CURRENT_DATE - 14
+	)
+	AND
+		Profile.last_open_date <= CURRENT_DATE -30
+	AND
+		Profile.last_click_date <= CURRENT_DATE - 30
+	AND
+		Profile.reg_date <= CURRENT_DATE - 14
+	AND
+	profile.daily_job_alert = TRUE
+	AND
+	profile.zip_code IN (
+		SELECT DISTINCT
+			"To_ZIPCODE"
+		FROM
+			test1."T_ZIP_Neighborhood" A
+		INNER JOIN test1."T_RGIS" b ON A ."From_ZIPCODE" = b."RGIS_ZIPCODE" --where a."Distance" <=50
+	)
+	AND 
+		profile.email_address !~* '(aol.com|gmail.com)'
+	AND profile. STATE IN (
+	'state_5',
+	'state_7',
+	'state_10',
+	'state_12',
+	'state_18',
+	'state_20',
+	'state_25',
+	'state_30'
+	)
+	AND
+	Profile.ActivityLevel = TRUE
+;
