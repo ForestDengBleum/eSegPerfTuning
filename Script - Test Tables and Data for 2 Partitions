@@ -457,3 +457,6 @@ FROM
 		FROM
 			test1.t_zipcode
 	) AS b (code);
+
+Create View v_profiles As
+Select * from t_profile_active_test;
