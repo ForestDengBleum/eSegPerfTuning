@@ -1,0 +1,10 @@
+--Q6 Welcome Day 2
+Create Index q6_t_profile_active_test_active on t_profile_active_test_active 
+(reg_date) 
+WHERE
+	daily_job_alert = TRUE;
+
+Create Index q6_t_profile_active_test_inactive on t_profile_active_test_inactive 
+(reg_date) 
+WHERE
+	daily_job_alert = TRUE;
