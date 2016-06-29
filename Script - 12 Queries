@@ -1,30 +1,33 @@
 SET constraint_exclusion = on;
+--set enable_seqscan = on;
+
 
 --Query 1 Daily Job Alert
 
+
 SELECT
-	Count(profile.jskr_id)
+	Count(jskr_id)
 FROM
-	test1.t_profile_active_test profile
+	v_profiles
 WHERE
 	(
-		Profile.last_open_date >= CURRENT_DATE - 60
-		OR Profile.Last_Click_Date >= CURRENT_DATE - 60
-		OR Profile.Last_Application_Date >= CURRENT_DATE - 14
-		OR Profile.reg_date >= CURRENT_DATE - 14
-		OR Profile.update_date >= CURRENT_DATE - 60
+		last_open_date >= CURRENT_DATE - 60
+		OR Last_Click_Date >= CURRENT_DATE - 60
+		OR Last_Application_Date >= CURRENT_DATE - 14
+		OR reg_date >= CURRENT_DATE - 14
+		OR update_date >= CURRENT_DATE - 60
 	)
 	AND
-	profile.daily_job_alert = TRUE
+	daily_job_alert = TRUE
 	AND
-	profile.zip_code IN (
+	zip_code IN (
 		SELECT DISTINCT
 			"To_ZIPCODE"
 		FROM
 			test1."T_ZIP_Neighborhood" A
 		INNER JOIN test1."T_RGIS" b ON A ."From_ZIPCODE" = b."RGIS_ZIPCODE" --where a."Distance" <=50
 	)
-	AND profile. STATE IN (
+	AND "state" IN (
 	'state_5',
 	'state_7',
 	'state_10',
@@ -35,32 +38,33 @@ WHERE
 	'state_30'
 	)
 	AND
-	Profile.ActivityLevel = TRUE
+	ActivityLevel = TRUE
 ;
 
 --Query 2 Daily Job Alert - Gmail AOL no opens in last 30 days
 
+
 SELECT
-	Count(profile.jskr_id)
+	Count(jskr_id)
 FROM
-	test1.t_profile_active_test profile
+	v_profiles 
 WHERE
 	(
-		Profile.last_open_date >= CURRENT_DATE - 60
-		OR Profile.Last_Click_Date >= CURRENT_DATE - 60
-		OR Profile.Last_Application_Date >= CURRENT_DATE - 14
-		OR Profile.update_date >= CURRENT_DATE - 60
+		last_open_date >= CURRENT_DATE - 60
+		OR Last_Click_Date >= CURRENT_DATE - 60
+		OR Last_Application_Date >= CURRENT_DATE - 14
+		OR update_date >= CURRENT_DATE - 60
 	)
 	AND
-		Profile.last_open_date <= CURRENT_DATE -30
+		last_open_date <= CURRENT_DATE -30
 	AND
-		Profile.last_click_date <= CURRENT_DATE - 30
+		last_click_date <= CURRENT_DATE - 30
 	AND
-		Profile.update_date <= CURRENT_DATE - 30
+		update_date <= CURRENT_DATE - 30
 	AND
-	profile.daily_job_alert = TRUE
+	daily_job_alert = TRUE
 	AND
-	profile.zip_code IN (
+	zip_code IN (
 		SELECT DISTINCT
 			"To_ZIPCODE"
 		FROM
@@ -68,32 +72,33 @@ WHERE
 		INNER JOIN test1."T_RGIS" b ON A ."From_ZIPCODE" = b."RGIS_ZIPCODE" --where a."Distance" <=50
 	)
 	AND 
-	profile.email_address !~* '(aol.com|gmail.com)'
+	email_address !~* '(aol.com|gmail.com)'
 	AND
-	Profile.ActivityLevel = TRUE
+	ActivityLevel = TRUE
 ;
 
 
 --Query 3 Employer Job Alert (postings)
 
+
 SELECT
-	Count(profile.jskr_id)
+	Count(jskr_id)
 FROM
-	test1.t_profile_active_test profile
+	v_profiles
 WHERE
-	(Profile.last_open_date>=CURRENT_DATE -60
-	 OR Profile.last_click_date >= CURRENT_DATE -60
-	 OR Profile.last_application_date >= CURRENT_DATE -60
-	 OR Profile.reg_date >= CURRENT_DATE - 60
+	(last_open_date>=CURRENT_DATE -60
+	 OR last_click_date >= CURRENT_DATE -60
+	 OR last_application_date >= CURRENT_DATE -60
+	 OR reg_date >= CURRENT_DATE - 60
 	)
 	AND
-		Profile.empr_job_alert = TRUE
+		empr_job_alert = TRUE
 	AND 
 	(
-		Profile.birth_date > CURRENT_DATE - 5840
-		OR Profile.birth_date IS NULL
+		birth_date > CURRENT_DATE - 5840
+		OR birth_date IS NULL
 	)
-	AND profile.zip_code IN (
+	AND zip_code IN (
 	SELECT DISTINCT
 		"To_ZIPCODE"
 	FROM
@@ -106,29 +111,30 @@ WHERE
 	AND C .industry_id = 77
 	)
 	AND
-	Profile.ActivityLevel = TRUE
+	ActivityLevel = TRUE
 ;
 
 --Q4 Employer Job Alert (ZIPs)
 
+
 SELECT
-	Count(profile.jskr_id)
+	Count(jskr_id)
 FROM
-	test1.t_profile_active_test profile
+	v_profiles
 WHERE
 	(
-		Profile.last_open_date >= CURRENT_DATE - 60
-		OR Profile.last_click_date >= CURRENT_DATE - 60
-		OR Profile.Last_application_Date >= CURRENT_DATE - 60
-		OR Profile.reg_date >= CURRENT_DATE - 60
+		last_open_date >= CURRENT_DATE - 60
+		OR last_click_date >= CURRENT_DATE - 60
+		OR Last_application_Date >= CURRENT_DATE - 60
+		OR reg_date >= CURRENT_DATE - 60
 	)
 AND 
-	Profile.empr_job_alert = TRUE
+	empr_job_alert = TRUE
 AND (
-	Profile.birth_date > CURRENT_DATE - 5840
-	OR Profile.birth_date IS NULL
+	birth_date > CURRENT_DATE - 5840
+	OR birth_date IS NULL
 )
-AND profile.zip_code IN (
+AND zip_code IN (
 	SELECT DISTINCT
 		"To_ZIPCODE"
 	FROM
@@ -144,29 +150,30 @@ AND profile.zip_code IN (
 		)
 	)
 	AND
-	Profile.ActivityLevel = TRUE
+	ActivityLevel = TRUE
 ;
 
 --Q5 Birthday
 
+
 SELECT
-	Count(profile.jskr_id)
+	Count(jskr_id)
 FROM
-	test1.t_profile_active_test profile
+	v_profiles
 WHERE
 	(
-		Profile.last_open_date >= CURRENT_DATE - 60
-		OR Profile.last_click_date >= CURRENT_DATE - 60
-		OR Profile.Last_application_Date >= CURRENT_DATE - 60
-		OR Profile.reg_date >= CURRENT_DATE - 60
+		last_open_date >= CURRENT_DATE - 60
+		OR last_click_date >= CURRENT_DATE - 60
+		OR Last_application_Date >= CURRENT_DATE - 60
+		OR reg_date >= CURRENT_DATE - 60
 	)
 	AND 
-		(profile.daily_job_alert = TRUE
-		 OR Profile.empr_job_alert = TRUE
+		(daily_job_alert = TRUE
+		 OR empr_job_alert = TRUE
 		)
-	AND to_Char(Profile.birth_date, 'DDMM') = to_char(CURRENT_DATE, 'DDMM')
+	AND to_Char(birth_date, 'DDMM') = to_char(CURRENT_DATE, 'DDMM')
 	AND
-	Profile.ActivityLevel = TRUE
+	ActivityLevel = TRUE
 ;
 
 --Q6 Response Model
@@ -198,45 +205,46 @@ WHERE
 
 --Q7 Welcome Day 2
 
+
 SELECT
-	Count(profile.jskr_id)
+	Count(jskr_id)
 FROM
-	test1.t_profile_active_test profile
+	v_profiles
 WHERE
-	profile.daily_job_alert = TRUE
+	daily_job_alert = TRUE
 	AND 
-	Profile.reg_date = CURRENT_DATE - 1;
+	reg_date = CURRENT_DATE - 1;
 
 --Q8 Daily Job Alert (Send Date)
 
 SELECT
-	Count(profile.jskr_id)
+	Count(jskr_id)
 FROM
-	test1.t_profile_active_test profile
+	v_profiles
 WHERE
 	(
-		Profile.Last_Application_Date >= CURRENT_DATE - 14
-		OR Profile.update_date >= CURRENT_DATE - 60
-		OR Profile.Last_send_date >= CURRENT_DATE - 60
+		Last_Application_Date >= CURRENT_DATE - 14
+		OR update_date >= CURRENT_DATE - 60
+		OR Last_send_date >= CURRENT_DATE - 60
 	)
 	AND 
-		Profile.Last_open_date <= CURRENT_DATE - 30
+		Last_open_date <= CURRENT_DATE - 30
 	AND 
-		Profile.Last_Click_Date <= CURRENT_DATE - 30
+		Last_Click_Date <= CURRENT_DATE - 30
 	AND 
-		Profile.reg_date < CURRENT_DATE - 14
+		reg_date < CURRENT_DATE - 14
 	AND
-		Profile.update_date <= CURRENT_DATE -30
+		update_date <= CURRENT_DATE -30
 	AND 
-		profile.daily_job_alert = TRUE
-	AND profile.zip_code IN (
+		daily_job_alert = TRUE
+	AND zip_code IN (
 	SELECT DISTINCT
 		"To_ZIPCODE"
 	FROM
 		test1."T_ZIP_Neighborhood" A
 	INNER JOIN test1."T_RGIS" b ON A ."From_ZIPCODE" = b."RGIS_ZIPCODE" --where a."Distance" <=50
 	)
-	AND profile. STATE IN (
+	AND "state" IN (
 	'state_1',
 	'state_5',
 	'state_7',
@@ -246,96 +254,96 @@ WHERE
 	'state_42'
 )
 	AND 
-		profile.email_address !~* '(aol.com|gmail.com)'
+		email_address !~* '(aol.com|gmail.com)'
 	AND
-		profile.ActivityLevel = TRUE
+		ActivityLevel = TRUE
 ;
 
 --Query 9 Welcome Day 6
 
+
 SELECT
-	Count(profile.jskr_id)
+	Count(jskr_id)
 FROM
-	test1.t_profile_active_test profile
+	v_profiles
 WHERE
-	Profile.reg_date < CURRENT_DATE - 6
+	reg_date < CURRENT_DATE - 6
 AND (
-	profile.daily_job_alert = TRUE
-	OR profile.daily_job_alert_weekly = TRUE
-	OR (
-		Profile.empr_job_alert = TRUE
-		OR Profile.empr_job_alert_weekly = TRUE
-		OR Profile.empr_job_alert_monthly = TRUE
+	daily_job_alert = TRUE
+	OR daily_job_alert_weekly = TRUE
+	OR empr_job_alert = TRUE
 	)
-);
+;
 
 --Q10 Winback 180
 
+
 SELECT
-	Count(profile.jskr_id)
+	Count(jskr_id)
 FROM
-	test1.t_profile_active_test profile
+	v_profiles
 WHERE
-		Profile.Last_open_date < CURRENT_DATE - 180
+		Last_open_date < CURRENT_DATE - 180
 	AND 
-		Profile.Last_Click_Date < CURRENT_DATE - 180
+		Last_Click_Date < CURRENT_DATE - 180
 	AND	
-		Profile.Last_Application_Date > CURRENT_DATE - 180
+		Last_Application_Date > CURRENT_DATE - 180
 	AND (
-		profile.daily_job_alert = TRUE
-		OR profile.daily_job_alert_weekly = TRUE
-		OR Profile.empr_job_alert = TRUE
+		daily_job_alert = TRUE
+		OR daily_job_alert_weekly = TRUE
+		OR empr_job_alert = TRUE
 		)
 ;
 
 --Q11 Winback Day 1
 
+
 SELECT
-	Count(profile.jskr_id)
+	Count(jskr_id)
 FROM
-	test1.t_profile_active_test profile
+	v_profiles
 WHERE
 	(
-		Profile.Last_Application_Date BETWEEN CURRENT_DATE - 90
+		Last_Application_Date BETWEEN CURRENT_DATE - 90
 		AND CURRENT_DATE - 30
-		OR Profile.Last_open_date BETWEEN CURRENT_DATE - 90
+		OR Last_open_date BETWEEN CURRENT_DATE - 90
 		AND CURRENT_DATE - 60
-		OR profile.Last_open_date IS NULL
-		OR Profile.Last_Click_Date BETWEEN CURRENT_DATE - 90
+		OR Last_open_date IS NULL
+		OR Last_Click_Date BETWEEN CURRENT_DATE - 90
 		AND CURRENT_DATE - 60
-		OR Profile.last_click_date IS NULL
+		OR last_click_date IS NULL
 	)
 	AND (
-		profile.daily_job_alert = TRUE
-		OR profile.daily_job_alert_weekly = TRUE
-		OR Profile.empr_job_alert = TRUE
+		daily_job_alert = TRUE
+		OR daily_job_alert_weekly = TRUE
+		OR empr_job_alert = TRUE
 	)
 ;
 
 --Query 12 Daily Job Alert 
 
 SELECT
-	Count(profile.jskr_id)
+	Count(jskr_id)
 FROM
-	test1.t_profile_active_test profile
+	v_profiles
 WHERE
 	(
-		Profile.last_open_date >= CURRENT_DATE - 60
-		OR Profile.Last_Click_Date >= CURRENT_DATE - 60
-		OR Profile.Last_Application_Date >= CURRENT_DATE - 14
-		OR Profile.update_date >= CURRENT_DATE - 60
-		OR Profile.reg_date >= CURRENT_DATE - 14
+		last_open_date >= CURRENT_DATE - 60
+		OR Last_Click_Date >= CURRENT_DATE - 60
+		OR Last_Application_Date >= CURRENT_DATE - 14
+		OR update_date >= CURRENT_DATE - 60
+		OR reg_date >= CURRENT_DATE - 14
 	)
 	AND
-		Profile.last_open_date <= CURRENT_DATE -30
+		last_open_date <= CURRENT_DATE -30
 	AND
-		Profile.last_click_date <= CURRENT_DATE - 30
+		last_click_date <= CURRENT_DATE - 30
 	AND
-		Profile.reg_date <= CURRENT_DATE - 14
+		reg_date <= CURRENT_DATE - 14
 	AND
-	profile.daily_job_alert = TRUE
+	daily_job_alert = TRUE
 	AND
-	profile.zip_code IN (
+	zip_code IN (
 		SELECT DISTINCT
 			"To_ZIPCODE"
 		FROM
@@ -343,8 +351,8 @@ WHERE
 		INNER JOIN test1."T_RGIS" b ON A ."From_ZIPCODE" = b."RGIS_ZIPCODE" --where a."Distance" <=50
 	)
 	AND 
-		profile.email_address !~* '(aol.com|gmail.com)'
-	AND profile. STATE IN (
+		email_address !~* '(aol.com|gmail.com)'
+	AND "state" IN (
 	'state_5',
 	'state_7',
 	'state_10',
@@ -355,5 +363,5 @@ WHERE
 	'state_30'
 	)
 	AND
-	Profile.ActivityLevel = TRUE
+	ActivityLevel = TRUE
 ;
