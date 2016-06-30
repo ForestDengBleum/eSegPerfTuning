@@ -176,35 +176,59 @@ WHERE
 	ActivityLevel = TRUE
 ;
 
---Q6 Response Model
+--Q6 Response Model - count the number
 
-SELECT
-	Count(profile.jskr_id)
+SELECT count(jskr_id)*0.2
+	FROM
+		v_profiles
+	WHERE
+		(
+		last_open_date >= CURRENT_DATE - 60
+		OR last_click_date >= CURRENT_DATE - 60
+		OR Last_application_Date >= CURRENT_DATE - 60
+		OR reg_date >= CURRENT_DATE - 60
+		)
+		AND
+		daily_job_alert = TRUE
+		AND
+		ActivityLevel = TRUE)；
+
+--Q6 Response Model - get attributes
+
+set enable_seqscan = on;
+
+SELECT 
+	jskr_id
 FROM
-	(select jskr_id, 
-					daily_job_alert, 
-					Last_open_date,
-					Last_click_date,
-					Last_application_date,
-					reg_date,
-					email_enga_score,
-					ActivityLevel
-	 from test1.t_profile_active_test order by email_enga_score
-	 LIMIT (select count(1)*0.2::integer from test1.t_profile_active_test)) profile
+	v_profiles
 WHERE
 	(
-		Profile.last_open_date >= CURRENT_DATE - 60
-		OR Profile.last_click_date >= CURRENT_DATE - 60
-		OR Profile.Last_application_Date >= CURRENT_DATE - 60
-		OR Profile.reg_date >= CURRENT_DATE - 60
+	last_open_date >= CURRENT_DATE - 60
+	OR last_click_date >= CURRENT_DATE - 60
+	OR Last_application_Date >= CURRENT_DATE - 60
+	OR reg_date >= CURRENT_DATE - 60
 	)
 	AND
-		profile.daily_job_alert = TRUE
+	daily_job_alert = TRUE
 	AND
-		Profile.ActivityLevel = TRUE;
+	ActivityLevel = TRUE
+	Order BY email_enga_score DESC
+	Limit (SELECT count(jskr_id)*0.2
+		FROM
+			v_profiles
+		WHERE
+			(
+			last_open_date >= CURRENT_DATE - 60
+			OR last_click_date >= CURRENT_DATE - 60
+			OR Last_application_Date >= CURRENT_DATE - 60
+			OR reg_date >= CURRENT_DATE - 60
+			)
+			AND
+			daily_job_alert = TRUE
+			AND
+			ActivityLevel = TRUE)
 
 --Q7 Welcome Day 2
-
 
 SELECT
 	Count(jskr_id)
