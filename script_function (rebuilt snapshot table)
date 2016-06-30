@@ -1,3 +1,8 @@
+-- this function is used to do A/B switch between snapshot table A and table B
+-- It should be called by pgAgent or Linux (cron) or Windows task scheduler at night once
+-- Parameter: scheName - schema name
+--	      snapshotNameA - name of snapshot table A
+--	      snapshotNameB - name of snapshot table B	
 CREATE OR REPLACE FUNCTION SNAPSHOT_SWITCH
 	(	scheName Varchar,
 		snapshotNameA VARCHAR, 
