@@ -1,0 +1,227 @@
+CREATE OR REPLACE FUNCTION SNAPSHOT_SWITCH
+	(	scheName Varchar,
+		snapshotNameA VARCHAR, 
+		snapshotNameB VARCHAR)
+RETURNS BOOLEAN AS $$
+DECLARE
+	pos INT:=0;  --use to store string position when using position FUNCTION 
+	sqlStat VARCHAR; -- use to store sql statement string
+	snapshotName VARCHAR;
+	activeSnapshotName VARCHAR; -- current used snapshot table name
+	sqls VARCHAR; -- sql statement
+	ret RECORD; -- records return from query
+	cnt INTEGER; -- int counter
+	bool_view BOOLEAN; -- 
+	indexText VARCHAR; -- sql text to rebuild sql
+BEGIN
+-- choose right snapshot table
+	BEGIN
+		
+		RAISE Notice 'Start - Choose the right snapshot table';
+
+		EXECUTE 'Select definition from pg_views where lower(viewname)=''v_profiles'' and lower(schemaname)=''' || scheName || ''''
+		INTO sqlStat;
+		IF sqlStat IS NULL THEN
+			RAISE NOTICE 'View - % not exist!', viewName;
+			RETURN FALSE;
+		END IF;
+		RAISE Notice 'The statement: %', sqlStat;
+		pos:= position(lower(snapshotNameA) in lower(sqlStat));
+		IF pos = 0 THEN
+			pos:= position(lower(snapshotNameB) in lower(sqlStat));
+			IF pos =0 THEN
+				RAISE Notice 'SnapShotTable: %, % not exist!',snapshotNameA,snapshotNameB;
+				RETURN FALSE;
+			ELSE
+				snapshotName:= snapshotNameA;
+				activeSnapshotName:= snapshotNameB;
+			END IF;
+		ELSE
+			snapshotName:= snapshotNameB;
+			activeSnapshotName:= snapshotNameA;
+		END IF;
+
+		RAISE NOTICE 'End - selected Snapshot table name: %', snapshotName ;
+
+		EXCEPTION WHEN OTHERS THEN
+			RAISE NOTICE 'Errors when choosing right SnapshotTable %, %!', snapshotNameA, snapshotNameB;
+			RETURN FALSE;
+	END;
+
+--truncate table and insert VALUE
+	BEGIN
+		--drop table and rebuild table without index to consider data insert speed
+		
+		RAISE Notice 'Start - drop table and insert data';
+		
+		EXECUTE 'drop table ' || scheName || '.'
+				|| snapshotName || ' CASCADE'; 
+		EXECUTE 'Create table '|| scheName || '.' || snapshotName || ' (like '|| activeSnapshotName || ')';
+		--Partition HANDLE
+		  --Active PARTITION
+		EXECUTE 'Create table '|| scheName || '.' || snapshotName || '_active (like '|| snapshotName || ')';
+		EXECUTE 'Alter table '|| scheName || '.' ||snapshotName || '_active add CONSTRAINT c1_'|| snapshotName || ' check(ActivityLevel = TRUE)';
+		EXECUTE 'Alter table '|| scheName || '.' ||snapshotName || '_active inherit '|| snapshotName;
+			--Inactive PARTITION
+		EXECUTE 'Create table '|| scheName || '.' ||snapshotName || '_inactive (like '|| snapshotName || ')';
+		EXECUTE 'Alter table '|| scheName || '.' ||snapshotName || '_inactive add CONSTRAINT c2_'|| snapshotName || ' check(ActivityLevel = FALSE)';
+		EXECUTE 'Alter table '|| scheName || '.' ||snapshotName || '_inactive inherit '|| snapshotName;
+
+		sqls:= 'Insert into '
+				|| snapshotName 
+				||' SELECT'
+				||' 	profile.jskr_id,'
+				||' 	profile.email_address,'
+				||' 	profile.first_name,'
+				||' 	profile.last_name,'
+				||' 	profile."state" ,'
+				||' 	profile.city ,'
+				||' 	profile.zip_code ,'
+				||' 	profile.birth_date ,'
+				||' 	profile.reg_date ,'
+				||' 	profile.update_date ,'
+				||' 	profile.job_exp_level,'
+				||' 	profile.edu_level,'
+				||' 	profile.daily_job_alert ,'
+				||' 	profile.daily_job_alert_weekly ,'
+				||' 	profile.daily_job_alert_monthly ,'
+				||' 	profile.empr_job_alert ,'
+				||' 	profile.empr_job_alert_weekly ,'
+				||' 	profile.empr_job_alert_monthly ,'
+				||' 	profile.recu_alert ,'
+				||' 	profile.recu_alert_weekly ,'
+				||' 	profile.recu_alert_monthly ,'
+				||' 	profile.parn_alert ,'
+				||' 	profile.avail_mod_complete ,'
+				||' 	profile.mon_mod_complete ,'
+				||' 	profile.video_mod_complete ,'
+				||' 	profile.work_hist_mod_complete ,'
+				||' 	profile.edu_mod_complete ,'
+				||' 	profile.refer_mod_complete ,'
+				||' 	profile.visua_mod_complete ,'
+				||' 	profile.drv_mod_complete ,'
+				||' 	profile.mgr_mod_complete ,'
+				||' 	profile.prof_percent_complete ,'
+				||' 	profile.email_enga_score ,'
+				||' 	profile.app_sub_count ,'
+				||' 	profile.sync_time ,'
+				||' 	profile.gender ,'
+				||' 	profile.prof_update_date ,'
+				||' 	emailopen.last_open_date ,'
+				||' 	emailclick.last_click_date ,'
+				||' 	application.last_application_date ,'
+				||' 	emailsends.last_send_date ,'
+				||'		(emailopen.last_open_date >= CURRENT_DATE - 60 OR emailclick.last_click_date >=CURRENT_DATE - 60 '
+				||'   OR application.last_application_date >=CURRENT_DATE -60 OR profile.reg_date >=CURRENT_DATE -60 '
+				||'   OR profile.update_date >= CURRENT_DATE -60 OR emailsends.last_send_date >= CURRENT_DATE -60) '	
+				||' 	FROM '
+				||		scheName || '.t_profile profile '
+				||' 	LEFT JOIN (select jskr_id, max(click_date) from '|| scheName ||'.t_email_click_partition Group by jskr_id) AS emailclick (jskr_id, Last_Click_date) on profile.jskr_id = emailclick.jskr_id'
+				||' 	LEFT JOIN (select jskr_id, max(open_date) from '|| scheName ||'.t_email_opens_partition GROUP BY jskr_id) AS emailopen (jskr_id, Last_open_date) on profile.jskr_id = emailopen.jskr_id'
+				||' 	LEFT JOIN (select jskr_id, max(sub_date) from '|| scheName ||'.t_job_application_partition Group by jskr_id) AS application (jskr_id, Last_Application_date) on profile.jskr_id = application.jskr_id'
+				||' 	LEFT JOIN (select jskr_id, max(send_date) from '|| scheName ||'.t_email_sends_partition Group by jskr_id) AS emailsends (jskr_id, last_send_date) on profile.jskr_id = emailsends.jskr_id'
+				||'   limit 200';
+		EXECUTE sqls;
+
+		RAISE Notice 'End - drop table and insert data';
+
+		EXCEPTION WHEN OTHERS THEN
+			RAISE NOTICE 'Errors when droping table and try to insert data';
+			RETURN FALSE;
+	END;	
+	
+	BEGIN
+	-- Rebuild all INDEXES
+
+		RAISE Notice 'Start - rebuild index';
+		--Parent table
+		For ret in Select indexdef From pg_indexes where tablename like activeSnapshotname and schemaname like scheName Loop
+
+			indexText:=replace(ret.indexdef,activeSnapshotName,snapshotName);
+		--	RAISE Notice 'Index: %', indexText;
+			EXECUTE indexText;
+
+		End Loop;
+		
+		-- Active PARTITION
+		For ret in Select indexdef From pg_indexes where tablename like activeSnapshotname || '_active' and schemaname like scheName Loop
+
+			indexText:=replace(ret.indexdef,activeSnapshotName,snapshotName);
+		--	RAISE Notice 'Index: %', indexText;
+			EXECUTE indexText;
+
+		End Loop;
+
+		-- Inactive PARTITION
+		For ret in Select indexdef From pg_indexes where tablename like activeSnapshotname || '_inactive' and schemaname like scheName Loop
+
+			indexText:=replace(ret.indexdef,activeSnapshotName,snapshotName);
+		--	RAISE Notice 'Index: %', indexText;
+			EXECUTE indexText;
+
+		End Loop;
+
+		RAISE Notice 'END - rebuild index';
+
+		EXCEPTION WHEN OTHERS THEN
+			RAISE NOTICE 'Errors when trying to rebuild all indexes';
+			RETURN FALSE;
+	END;
+
+--check view status
+	BEGIN
+		
+		RAISE Notice 'Start - Check view status';
+		cnt:=0;
+		LOOP
+			FOR ret in SELECT position('v_profiles'in lower(query)) pos FROM pg_stat_activity where "state"='active' LOOP
+				RAISE Notice 'ret.pos value: %',ret.pos;
+				IF ret.pos > 0 THEN
+						cnt := cnt + 1;
+				END IF;
+			END LOOP;
+			
+			RAISE Notice 'cnt value: %',cnt;
+
+			IF cnt > 1 THEN 
+				bool_view:=TRUE;
+				SELECT pg_sleep(20);
+			ELSE
+				bool_view:=FALSE;
+			END IF;
+			EXIT WHEN bool_view = FALSE;	
+		END LOOP;
+
+		RAISE Notice 'END - Check view status';
+
+		EXCEPTION WHEN OTHERS THEN
+			RAISE NOTICE 'Errors when waiting for the operations on v_profile done!';
+			RETURN FALSE;
+	END;
+--Drop and recreate view/alter VIEW
+	BEGIN
+-- 		EXECUTE 'select definition from pg_views where viewname = ''v_profiles'''
+-- 			into sqlstat;
+		RAISE NOTICE 'Start - drop view and rebuild view';
+		
+		Drop view v_profiles CASCADE;
+ 		EXECUTE 'CREATE view v_profiles '
+				|| ' AS select * from '
+				|| snapshotName;
+		
+		RAISE NOTICE 'END - drop view and rebuild view';
+		
+		RETURN TRUE;
+
+		EXCEPTION WHEN OTHERS THEN
+			RAISE NOTICE 'Errors when rebuild view!';
+			RETURN FALSE;
+		
+	END;
+	
+END;
+
+$$
+LANGUAGE plpgsql
+
+
