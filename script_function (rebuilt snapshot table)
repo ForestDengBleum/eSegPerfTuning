@@ -124,8 +124,8 @@ BEGIN
 				||' 	LEFT JOIN (select jskr_id, max(click_date) from '|| scheName ||'.t_email_click_partition Group by jskr_id) AS emailclick (jskr_id, Last_Click_date) on profile.jskr_id = emailclick.jskr_id'
 				||' 	LEFT JOIN (select jskr_id, max(open_date) from '|| scheName ||'.t_email_opens_partition GROUP BY jskr_id) AS emailopen (jskr_id, Last_open_date) on profile.jskr_id = emailopen.jskr_id'
 				||' 	LEFT JOIN (select jskr_id, max(sub_date) from '|| scheName ||'.t_job_application_partition Group by jskr_id) AS application (jskr_id, Last_Application_date) on profile.jskr_id = application.jskr_id'
-				||' 	LEFT JOIN (select jskr_id, max(send_date) from '|| scheName ||'.t_email_sends_partition Group by jskr_id) AS emailsends (jskr_id, last_send_date) on profile.jskr_id = emailsends.jskr_id'
-				||'   limit 200';
+				||' 	LEFT JOIN (select jskr_id, max(send_date) from '|| scheName ||'.t_email_sends_partition Group by jskr_id) AS emailsends (jskr_id, last_send_date) on profile.jskr_id = emailsends.jskr_id';
+				--||'   limit 200';
 		EXECUTE sqls;
 
 		RAISE Notice 'End - drop table and insert data';
