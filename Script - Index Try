@@ -22,3 +22,25 @@ Create Index q9_t_profile_active_test_inactive on t_profile_active_test_inactive
 WHERE
 	daily_job_alert = TRUE OR daily_job_alert_weekly = true
 	Or OR empr_job_alert = TRUE
+
+--Q10, Q11 Winback Partial Index  -- successfully improve Performance
+
+CREATE INDEX Q10_t_profile_active_test_active on t_profile_active_test_active 
+( last_open_date,
+	last_click_date,
+	last_application_date
+)
+WHERE
+		daily_job_alert = TRUE
+		OR daily_job_alert_weekly = TRUE
+		OR empr_job_alert = TRUE;
+-- 
+CREATE INDEX Q10_t_profile_active_test_inactive on t_profile_active_test_inactive 
+( last_open_date,
+	last_click_date,
+	last_application_date
+)
+WHERE
+		daily_job_alert = TRUE
+		OR daily_job_alert_weekly = TRUE
+		OR empr_job_alert = TRUE;
