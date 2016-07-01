@@ -188,7 +188,7 @@ BEGIN
 			
 			RAISE Notice 'cnt value: %',cnt;
 
-			IF cnt > 1 THEN 
+			IF cnt >= 1 THEN 
 				bool_view:=TRUE;
 				SELECT pg_sleep(20);
 			ELSE
