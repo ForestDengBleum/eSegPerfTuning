@@ -112,7 +112,7 @@ INSERT INTO t_Snapshot_Profile_A SELECT
 	(emailopen.last_open_date >= CURRENT_DATE - 60 OR emailclick.last_click_date >=CURRENT_DATE - 60 OR application.last_application_date >=CURRENT_DATE -60
 	 OR profile.reg_date >=CURRENT_DATE -60 OR profile.update_date >= CURRENT_DATE -60 OR emailsends.last_send_date >= CURRENT_DATE -60) ActivityLevel	
 FROM
-	t_profile profile 
+	t_jskr_profile profile 
 	LEFT JOIN (select jskr_id, max(click_date) from t_email_click_partition Group by jskr_id) AS emailclick (jskr_id, Last_Click_date) on profile.jskr_id = emailclick.jskr_id
 	LEFT JOIN (select jskr_id, max(open_date) from t_email_opens_partition GROUP BY jskr_id) AS emailopen (jskr_id, Last_open_date) on profile.jskr_id = emailopen.jskr_id
 	LEFT JOIN (select jskr_id, max(sub_date) from t_job_application_partition Group by jskr_id) AS application (jskr_id, Last_Application_date) on profile.jskr_id = application.jskr_id
@@ -130,6 +130,43 @@ Drop INDEX IF EXISTS Index_zipcode_t_Snapshot_Profile_A_Inactive;
 Create index Index_zipcode_t_Snapshot_Profile_A_Inactive on t_Snapshot_Profile_A_Inactive (
 	zip_code
 );
+
+--Special Partial Index for Q6 Welcome Day 2
+Drop INDEX IF EXISTS Index_Q6_t_Snapshot_Profile_A_Active;
+Create Index Index_Q6_t_Snapshot_Profile_A_Active on t_Snapshot_Profile_A_Active
+(reg_date) 
+WHERE
+	daily_job_alert = TRUE;
+
+Drop INDEX IF EXISTS Index_Q6_t_Snapshot_Profile_A_Inactive;
+Create Index Index_Q6_t_Snapshot_Profile_A_Inactive on t_Snapshot_Profile_A_Inactive
+(reg_date) 
+WHERE
+	daily_job_alert = TRUE;
+
+--Special Partial Index for Q10, Q11 Winback
+Drop INDEX IF EXISTS Index_Q10Q11_t_Snapshot_Profile_A_Active;
+CREATE INDEX Index_Q10Q11_t_Snapshot_Profile_A_Active on t_Snapshot_Profile_A_Active 
+( last_open_date,
+	last_click_date,
+	last_application_date
+)
+WHERE
+	daily_job_alert = TRUE
+	OR daily_job_alert_weekly = TRUE
+	OR empr_job_alert = TRUE;
+
+Drop INDEX IF EXISTS Index_Q10Q11_t_Snapshot_Profile_A_Inactive; 
+CREATE INDEX Index_Q10Q11_t_Snapshot_Profile_A_Inactive on t_Snapshot_Profile_A_Inactive 
+( last_open_date,
+	last_click_date,
+	last_application_date
+)
+WHERE
+		daily_job_alert = TRUE
+		OR daily_job_alert_weekly = TRUE
+		OR empr_job_alert = TRUE;
+
 
 --Create Snapshot B table
 
@@ -245,7 +282,7 @@ INSERT INTO t_Snapshot_Profile_B SELECT
 	(emailopen.last_open_date >= CURRENT_DATE - 60 OR emailclick.last_click_date >=CURRENT_DATE - 60 OR application.last_application_date >=CURRENT_DATE -60
 	 OR profile.reg_date >=CURRENT_DATE -60 OR profile.update_date >= CURRENT_DATE -60 OR emailsends.last_send_date >= CURRENT_DATE -60) ActivityLevel	
 FROM
-	t_profile profile 
+	t_jskr_profile profile 
 	LEFT JOIN (select jskr_id, max(click_date) from t_email_click_partition Group by jskr_id) AS emailclick (jskr_id, Last_Click_date) on profile.jskr_id = emailclick.jskr_id
 	LEFT JOIN (select jskr_id, max(open_date) from t_email_opens_partition GROUP BY jskr_id) AS emailopen (jskr_id, Last_open_date) on profile.jskr_id = emailopen.jskr_id
 	LEFT JOIN (select jskr_id, max(sub_date) from t_job_application_partition Group by jskr_id) AS application (jskr_id, Last_Application_date) on profile.jskr_id = application.jskr_id
@@ -264,16 +301,44 @@ Create index Index_zipcode_t_Snapshot_Profile_B_Inactive on t_Snapshot_Profile_B
 	zip_code
 );
 
+
+--Special Partial Index for Q6 Welcome Day 2
+Drop INDEX IF EXISTS Index_Q6_t_Snapshot_Profile_B_Active;
+Create Index Index_Q6_t_Snapshot_Profile_B_Active on t_Snapshot_Profile_B_Active
+(reg_date) 
+WHERE
+	daily_job_alert = TRUE;
+
+Drop INDEX IF EXISTS Index_Q6_t_Snapshot_Profile_B_Inactive;
+Create Index Index_Q6_t_Snapshot_Profile_B_Inactive on t_Snapshot_Profile_B_Inactive
+(reg_date) 
+WHERE
+	daily_job_alert = TRUE;
+
+--Special Partial Index for Q10, Q11 Winback
+
+Drop INDEX IF EXISTS Index_Q10Q11_t_Snapshot_Profile_B_Active;
+CREATE INDEX Index_Q10Q11_t_Snapshot_Profile_B_Active on t_Snapshot_Profile_B_Active 
+( last_open_date,
+	last_click_date,
+	last_application_date
+)
+WHERE
+	daily_job_alert = TRUE
+	OR daily_job_alert_weekly = TRUE
+	OR empr_job_alert = TRUE;
+
+Drop INDEX IF EXISTS Index_Q10Q11_t_Snapshot_Profile_B_Inactive; 
+CREATE INDEX Index_Q10Q11_t_Snapshot_Profile_B_Inactive on t_Snapshot_Profile_B_Inactive 
+( last_open_date,
+	last_click_date,
+	last_application_date
+)
+WHERE
+		daily_job_alert = TRUE
+		OR daily_job_alert_weekly = TRUE
+		OR empr_job_alert = TRUE;
+
 --Create VIEW
 Drop view if EXISTS v_profiles;
 Create View v_profiles AS Select * from t_Snapshot_Profile_A;
-
-
-
-
-
-
-
-
-
-
