@@ -1,0 +1,335 @@
+-- this function is used to do A/B switch between snapshot table A and table B
+-- It should be called by pgAgent or Linux (cron) or Windows task scheduler at night once
+-- Parameter: scheName - schema name
+--	      snapshotNameA - name of snapshot table A
+--	      snapshotNameB - name of snapshot table B	
+CREATE OR REPLACE FUNCTION snapshot_switch(schename varchar, snapshotnamea varchar, snapshotnameb varchar)
+  RETURNS BOOLEAN AS $BODY$
+DECLARE
+	pos INT:=0;  --use to store string position when using position FUNCTION 
+	sqlStat VARCHAR; -- use to store sql statement string
+	snapshotName VARCHAR;
+	activeSnapshotName VARCHAR; -- current used snapshot table name
+	sqls VARCHAR; -- sql statement
+	ret RECORD; -- records return from query
+	cnt INTEGER; -- int counter
+	bool_view BOOLEAN; -- 
+	indexText VARCHAR; -- sql text to rebuild sql
+BEGIN
+-- choose right snapshot table
+	BEGIN
+		
+		RAISE Notice '%: Start - Choose the right snapshot table', timeofday();
+
+		EXECUTE 'Select definition from pg_views where lower(viewname)=''v_profiles'' and lower(schemaname)=''' || scheName || ''''
+		INTO sqlStat;
+		IF sqlStat IS NULL THEN
+			RAISE NOTICE '%: View - % not exist!', timeofday(), viewName;
+			RETURN FALSE;
+		END IF;
+		--RAISE Notice '%: The statement: %', timeofday(), sqlStat;
+		pos:= position(lower(snapshotNameA) in lower(sqlStat));
+		IF pos = 0 THEN
+			pos:= position(lower(snapshotNameB) in lower(sqlStat));
+			IF pos =0 THEN
+				RAISE Notice '%: SnapShotTable: %, % not exist!', timeofday(), snapshotNameA,snapshotNameB;
+				RETURN FALSE;
+			ELSE
+				snapshotName:= snapshotNameA;
+				activeSnapshotName:= snapshotNameB;
+			END IF;
+		ELSE
+			snapshotName:= snapshotNameB;
+			activeSnapshotName:= snapshotNameA;
+		END IF;
+
+		RAISE NOTICE '%: End - selected Snapshot table name: %', timeofday(), snapshotName ;
+
+		EXCEPTION WHEN OTHERS THEN
+			RAISE NOTICE '%: Errors when choosing right SnapshotTable %, %!', timeofday(), snapshotNameA, snapshotNameB;
+			RETURN FALSE;
+	END;
+
+--truncate table and insert VALUE
+	BEGIN
+		--drop table and rebuild table without index to consider data insert speed
+		
+		RAISE Notice '%: Start - drop table, recreate table & insert data', timeofday();
+		
+		EXECUTE 'drop table ' || scheName || '.'
+				|| snapshotName || ' CASCADE'; 
+
+		RAISE Notice '%: Create partition tables ', timeofday();
+
+		EXECUTE 'Create table '|| scheName || '.' || snapshotName || ' (like '|| activeSnapshotName || ')';
+		--Partition HANDLE
+		  --Active PARTITION
+		EXECUTE 'Create table '|| scheName || '.' || snapshotName || '_active (like '|| snapshotName || ')';
+			--Inactive PARTITION
+		EXECUTE 'Create table '|| scheName || '.' ||snapshotName || '_inactive (like '|| snapshotName || ')';
+
+			--Create TRIGGER
+
+-- 		RAISE Notice '%: Create the function/trigger ', timeofday();
+-- 
+-- 		sqls:=  ' CREATE OR REPLACE FUNCTION '|| scheName || '.' || 'trigger_partition_' || snapshotName || '() '
+-- 				||' RETURNS TRIGGER AS $$ '
+-- 				||' BEGIN '
+-- 				||' 	IF ( NEW.activitylevel = TRUE ) THEN '
+-- 				||' 		INSERT INTO ' || scheName || '.' || snapshotName || '_active ' || ' VALUES (NEW.*); '
+-- 				||' 	ELSIF  ( 	NEW.activitylevel = FALSE ) THEN '
+-- 				||' 		INSERT INTO ' || scheName || '.' || snapshotName || '_inactive ' || ' VALUES (NEW.*); '
+-- 				||' 	ELSE '
+-- 				||' 		RAISE EXCEPTION ''%: Error when creating trigger for partition insert'', timeofday(); '
+-- 				||' 	END IF; '
+-- 				||' 	RETURN NULL; '
+-- 				||' END; '
+-- 				||' $$ '
+-- 				||' LANGUAGE plpgsql ';
+-- 		EXECUTE sqls;
+-- 
+-- 		sqls:= ' CREATE TRIGGER insert_trigger_partition_' || snapshotName
+-- 				||' BEFORE INSERT ON '|| scheName || '.' || snapshotName
+-- 				||' FOR EACH ROW EXECUTE PROCEDURE '|| scheName || '.' || 'trigger_partition_' || snapshotName || '()' ;	
+-- 		EXECUTE sqls;
+-- 
+		-- Insert data
+
+		RAISE Notice '%: Insert data into active partition... ', timeofday();
+
+
+		sqls:= 'Insert into '
+				|| snapshotName || '_active '
+				||' SELECT'
+				||' 	profile.jskr_id,'
+				||' 	profile.email_address,'
+				||' 	profile.first_name,'
+				||' 	profile.last_name,'
+				||' 	profile."state" ,'
+				||' 	profile.city ,'
+				||' 	profile.zip_code ,'
+				||' 	profile.birth_date ,'
+				||' 	profile.reg_date ,'
+				||' 	profile.update_date ,'
+				||' 	profile.job_exp_level,'
+				||' 	profile.edu_level,'
+				||' 	profile.daily_job_alert ,'
+				||' 	profile.daily_job_alert_weekly ,'
+				||' 	profile.daily_job_alert_monthly ,'
+				||' 	profile.empr_job_alert ,'
+				||' 	profile.empr_job_alert_weekly ,'
+				||' 	profile.empr_job_alert_monthly ,'
+				||' 	profile.recu_alert ,'
+				||' 	profile.recu_alert_weekly ,'
+				||' 	profile.recu_alert_monthly ,'
+				||' 	profile.parn_alert ,'
+				||' 	profile.avail_mod_complete ,'
+				||' 	profile.mon_mod_complete ,'
+				||' 	profile.video_mod_complete ,'
+				||' 	profile.work_hist_mod_complete ,'
+				||' 	profile.edu_mod_complete ,'
+				||' 	profile.refer_mod_complete ,'
+				||' 	profile.visua_mod_complete ,'
+				||' 	profile.drv_mod_complete ,'
+				||' 	profile.mgr_mod_complete ,'
+				||' 	profile.prof_percent_complete ,'
+				||' 	profile.email_enga_score ,'
+				||' 	profile.app_sub_count ,'
+				||' 	profile.sync_time ,'
+				||' 	profile.gender ,'
+				||' 	profile.prof_update_date ,'
+				||' 	emailopen.last_open_date ,'
+				||' 	emailclick.last_click_date ,'
+				||' 	application.last_application_date ,'
+				||' 	emailsends.last_send_date ,'
+				||'   1'
+ 				||' 	FROM '
+				||		scheName || '.t_jskr_profile profile '
+				||' 	LEFT JOIN (select jskr_id, max(click_date) from '|| scheName ||'.t_email_click Group by jskr_id  ) AS emailclick (jskr_id, Last_Click_date) on profile.jskr_id = emailclick.jskr_id'
+				||' 	LEFT JOIN (select jskr_id, max(open_date) from '|| scheName ||'.t_email_opens GROUP BY jskr_id  ) AS emailopen (jskr_id, Last_open_date) on profile.jskr_id = emailopen.jskr_id'
+				||' 	LEFT JOIN (select jskr_id, max(sub_date) from '|| scheName ||'.t_job_application Group by jskr_id  ) AS application (jskr_id, Last_Application_date) on profile.jskr_id = application.jskr_id'
+				||' 	LEFT JOIN (select jskr_id, max(send_date) from '|| scheName ||'.t_email_sends Group by jskr_id  ) AS emailsends (jskr_id, last_send_date) on profile.jskr_id = emailsends.jskr_id'
+				||'   WHERE '
+				||'		(COALESCE(emailopen.last_open_date >= CURRENT_DATE - 60, FALSE) OR COALESCE(emailclick.last_click_date >=CURRENT_DATE - 60, FALSE) '
+				||'   OR COALESCE(application.last_application_date >=CURRENT_DATE -60, FALSE) OR COALESCE(profile.reg_date >=CURRENT_DATE -60, FALSE) '
+				||'   OR COALESCE(profile.update_date >= CURRENT_DATE -60, FALSE) OR COALESCE(emailsends.last_send_date >= CURRENT_DATE -60, FALSE)) = TRUE ';
+				--||'   limit 100';
+
+		EXECUTE sqls;
+		
+		-- add constraint / INHERIT
+		EXECUTE 'Alter table '|| scheName || '.' ||snapshotName || '_active add CONSTRAINT c1_'|| snapshotName || ' check (activitylevel = 1)';
+		EXECUTE 'Alter table '|| scheName || '.' ||snapshotName || '_active inherit '|| scheName || '.' || snapshotName;
+
+
+		RAISE Notice '%: Insert data into inactive partition... ', timeofday();
+
+
+		sqls:= 'Insert into '
+				|| snapshotName || '_inactive '
+				||' SELECT'
+				||' 	profile.jskr_id,'
+				||' 	profile.email_address,'
+				||' 	profile.first_name,'
+				||' 	profile.last_name,'
+				||' 	profile."state" ,'
+				||' 	profile.city ,'
+				||' 	profile.zip_code ,'
+				||' 	profile.birth_date ,'
+				||' 	profile.reg_date ,'
+				||' 	profile.update_date ,'
+				||' 	profile.job_exp_level,'
+				||' 	profile.edu_level,'
+				||' 	profile.daily_job_alert ,'
+				||' 	profile.daily_job_alert_weekly ,'
+				||' 	profile.daily_job_alert_monthly ,'
+				||' 	profile.empr_job_alert ,'
+				||' 	profile.empr_job_alert_weekly ,'
+				||' 	profile.empr_job_alert_monthly ,'
+				||' 	profile.recu_alert ,'
+				||' 	profile.recu_alert_weekly ,'
+				||' 	profile.recu_alert_monthly ,'
+				||' 	profile.parn_alert ,'
+				||' 	profile.avail_mod_complete ,'
+				||' 	profile.mon_mod_complete ,'
+				||' 	profile.video_mod_complete ,'
+				||' 	profile.work_hist_mod_complete ,'
+				||' 	profile.edu_mod_complete ,'
+				||' 	profile.refer_mod_complete ,'
+				||' 	profile.visua_mod_complete ,'
+				||' 	profile.drv_mod_complete ,'
+				||' 	profile.mgr_mod_complete ,'
+				||' 	profile.prof_percent_complete ,'
+				||' 	profile.email_enga_score ,'
+				||' 	profile.app_sub_count ,'
+				||' 	profile.sync_time ,'
+				||' 	profile.gender ,'
+				||' 	profile.prof_update_date ,'
+				||' 	emailopen.last_open_date ,'
+				||' 	emailclick.last_click_date ,'
+				||' 	application.last_application_date ,'
+				||' 	emailsends.last_send_date ,'
+				||'   0'
+ 				||' 	FROM '
+				||		scheName || '.t_jskr_profile profile '
+				||' 	LEFT JOIN (select jskr_id, max(click_date) from '|| scheName ||'.t_email_click Group by jskr_id ) AS emailclick (jskr_id, Last_Click_date) on profile.jskr_id = emailclick.jskr_id'
+				||' 	LEFT JOIN (select jskr_id, max(open_date) from '|| scheName ||'.t_email_opens GROUP BY jskr_id ) AS emailopen (jskr_id, Last_open_date) on profile.jskr_id = emailopen.jskr_id'
+				||' 	LEFT JOIN (select jskr_id, max(sub_date) from '|| scheName ||'.t_job_application Group by jskr_id ) AS application (jskr_id, Last_Application_date) on profile.jskr_id = application.jskr_id'
+				||' 	LEFT JOIN (select jskr_id, max(send_date) from '|| scheName ||'.t_email_sends Group by jskr_id ) AS emailsends (jskr_id, last_send_date) on profile.jskr_id = emailsends.jskr_id'
+				||'   WHERE '
+				||'		(COALESCE(emailopen.last_open_date >= CURRENT_DATE - 60, FALSE) OR COALESCE(emailclick.last_click_date >=CURRENT_DATE - 60, FALSE) '
+				||'   OR COALESCE(application.last_application_date >=CURRENT_DATE -60, FALSE) OR COALESCE(profile.reg_date >=CURRENT_DATE -60, FALSE) '
+				||'   OR COALESCE(profile.update_date >= CURRENT_DATE -60, FALSE) OR COALESCE(emailsends.last_send_date >= CURRENT_DATE -60, FALSE)) = FALSE ';
+				--||'		limit 100 ';
+
+		EXECUTE sqls;
+		
+		--add contraint, INHERIT
+		EXECUTE 'Alter table '|| scheName || '.' ||snapshotName || '_inactive add CONSTRAINT c2_'|| snapshotName || ' check (activitylevel = 0)';
+		EXECUTE 'Alter table '|| scheName || '.' ||snapshotName || '_inactive inherit '|| scheName || '.' || snapshotName;
+
+		RAISE Notice '%: End - drop table, recreate table & insert data', timeofday();
+
+		--EXCEPTION WHEN OTHERS THEN
+		--	RAISE NOTICE '%: Errors when droping table and try to insert data', timeofday();
+		--	RETURN FALSE;
+	END;	
+	
+	BEGIN
+	-- Rebuild all INDEXES
+
+		RAISE Notice '%: Start - rebuild index', timeofday();
+		--Parent table
+		For ret in Select indexdef From pg_indexes where tablename like activeSnapshotname and schemaname like scheName Loop
+
+			indexText:=replace(ret.indexdef,activeSnapshotName,snapshotName);
+			RAISE Notice '%: Create Index: %', timeofday(), indexText;
+			EXECUTE indexText;
+
+		End Loop;
+		
+		-- Active PARTITION
+		For ret in Select indexdef From pg_indexes where tablename like activeSnapshotname || '_active' and schemaname like scheName Loop
+
+			indexText:=replace(ret.indexdef,activeSnapshotName,snapshotName);
+			RAISE Notice '%: Create Index: %', timeofday(), indexText;
+			EXECUTE indexText;
+
+		End Loop;
+
+		-- Inactive PARTITION
+		For ret in Select indexdef From pg_indexes where tablename like activeSnapshotname || '_inactive' and schemaname like scheName Loop
+
+			indexText:=replace(ret.indexdef,activeSnapshotName,snapshotName);
+			RAISE Notice '%: Create Index: %', timeofday(), indexText;
+			EXECUTE indexText;
+
+		End Loop;
+
+		RAISE Notice '%: END - rebuild index', timeofday();
+
+		EXCEPTION WHEN OTHERS THEN
+			RAISE NOTICE '%: Errors when trying to rebuild all indexes', timeofday();
+			RETURN FALSE;
+	END;
+
+--check view status
+	BEGIN
+		
+		RAISE Notice '%: Start - Check view status', timeofday();
+
+		LOOP
+		  cnt:=0;
+			FOR ret in SELECT position('v_profiles'in lower(query)) pos FROM pg_stat_activity where "state"='active' LOOP
+			
+				--RAISE Notice '%: ret.pos value: %', timeofday(), ret.pos;
+				IF ret.pos > 0 THEN
+						cnt := cnt + 1;
+				END IF;
+			
+			END LOOP;
+			
+			--RAISE Notice '%: cnt value: %',timeofday(), cnt;
+
+			IF cnt > 1 THEN 
+				bool_view:=TRUE;
+				SELECT pg_sleep(20);
+			ELSE
+				bool_view:=FALSE;
+			END IF;
+			EXIT WHEN bool_view = FALSE;	
+		END LOOP;
+
+		RAISE Notice '%:END - Check view status', timeofday();
+
+		EXCEPTION WHEN OTHERS THEN
+			RAISE NOTICE 'Errors when waiting for the operations on v_profile done!';
+			RETURN FALSE;
+	END;
+--Drop and recreate view/alter VIEW
+	BEGIN
+-- 		EXECUTE 'select definition from pg_views where viewname = ''v_profiles'''
+-- 			into sqlstat;
+		RAISE NOTICE '%: Start - drop view and rebuild view', timeofday();
+		
+		Drop view v_profiles CASCADE;
+ 		EXECUTE 'CREATE view v_profiles '
+				|| ' AS select * from '
+				|| snapshotName;
+		
+		RAISE NOTICE '%: END - drop view and rebuild view', timeofday();
+		
+		RETURN TRUE;
+
+		EXCEPTION WHEN OTHERS THEN
+			RAISE NOTICE '%: Errors when rebuild view!', timeofday();
+			RETURN FALSE;
+		
+	END;
+	
+END;
+
+$BODY$
+LANGUAGE 'plpgsql' 
+;
+
